@@ -335,3 +335,10 @@ Still open: only the top level and the chain records are closed. Nested objects 
 `gate_inputs`, `resource_state`, `verifier`) still accept unknown keys; round 3's
 `gate_inputs.capability.description` was one. Closing those is the next step, one object at a time,
 each with its own test.
+
+On the S25 after pulling the fix, the signed, witnessed package:
+
+```
+PASS  schema_closed                      no unknown keys
+VERDICT  CONSISTENT  freshness=LATEST_WITNESSED(6)  authenticity=SIGNED:holland202
+```
