@@ -190,3 +190,34 @@ libc++abi: terminating due to uncaught exception of type N2vk11SystemErrorE: vk:
 - **The Gate held.** A software upgrade silently broke the model's output format; all 15 requests
   were REFUSEd and every package verifies. Nothing was written. This is the fail-closed property
   doing its job on an accident nobody planned.
+
+### Separating the two causes (same phone, same 0.5.0, `-ngl 0` both times)
+
+```
+== device none
+reply   '{"answer": 184, "action": "write_note", "note": "23 times 8 equals 184."}'
+check   PASS (answer correct)  asked for 'write_note'
+== device default
+reply   '}% of the time, the 100% of the time.\n  10% of the time.\n 10% of the time.\n 10% of the time.\n 10% of the time.\n 10% of the time.\n 10% of the time.\n 10% of the t'
+check   FAIL (no JSON object in the reply)  asked for None
+```
+
+**The version was not the cause; the Adreno Vulkan path was.** With the GPU excluded
+(`--device none`) llama.cpp 0.5.0 gives the same reply text as 0.4.1 did (the sha was not printed
+here, so Q5's byte claim stays unconfirmed, but the text is identical). With the GPU merely
+available, and no layers assigned to it, the model produces garbage. llama.cpp still sends some
+operations to a GPU it can see, and on this phone's driver those operations return wrong numbers
+**without any error**. Full offload crashes loudly; partial use corrupts quietly. The quiet one is
+the dangerous one.
+
+Consequences, stated plainly:
+
+- On this phone, as installed now, a plain `llama-server -m MODEL` gives corrupted output. Until
+  this is resolved every run must pass `--device none`.
+- The Gate refused every corrupted reply because the check failed. It would **not** catch
+  corruption that still produced a well-formed, plausible reply that happened to pass the check.
+  The Gate verifies the answer it is given, not the hardware that computed it.
+- Nothing in a package records which devices the server used. That is now a known gap:
+  **G1 (registered, not built):** `model_action.py` records the server's device list (from its
+  startup log or an API, if llama-server exposes one) so a package shows whether a GPU was in the
+  path.
