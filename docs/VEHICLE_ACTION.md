@@ -83,3 +83,140 @@ Contested navigation, where the honest expectation is partial:
 
 Not in scope and not claimed: real hardware, a real radio link, the phone running the simulator,
 defense or space use.
+
+## Results — ArduCopter SITL (container x86_64, Python 3.11.15)
+
+ArduPilot master built here (`./waf copter`, SITL board), run as `arducopter --model quad
+--speedup 5 --home 35.3632,-96.9270,300,0` with ArduPilot's default copter parameters. Faults
+injected with `tools/mav_param.py`, never by the tool under test. `--thermal-status normal`
+(declared): the container has no thermal zones. The ten packages are in `runs/vehicle_sitl/`,
+unsigned; each verifies `VERDICT  CONSISTENT` here.
+
+**Unplanned, first:** the first two requests went in 45 s after start, before the simulated GPS
+had a fix. Both were refused, and the check says why:
+
+```
+== --action takeoff --alt 10
+before  fix 0 sats 0 ekf 1024 battery 100% alt 0.0 m armed False mode STABILIZE
+check   FAIL (vehicle 10635165.4 m from fence centre > 300.0 m; gps fix 0 < 3; satellites 0 < 6; ekf has no absolute horizontal position (flags 1024))
+decision REFUSE ['verification_not_passed']
+sent    nothing
+== --action goto --north 100 --alt 20
+before  fix 6 sats 10 ekf 167 battery 100% alt 0.0 m armed False mode STABILIZE
+check   FAIL (ekf has no absolute horizontal position (flags 167))
+decision REFUSE ['verification_not_passed']
+sent    nothing
+```
+
+(With no fix the reported position is 0, 0, which is 10,635 km from the fence. In the second, the
+GPS had a fix but the EKF had not yet accepted it.) Then, after waiting for the EKF
+(`ready after 0 s, ekf flags 831`):
+
+```
+== --action takeoff --alt 10
+before  fix 6 sats 10 ekf 831 battery 100% alt 0.0 m armed False mode STABILIZE
+check   PASS (all takeoff rules hold)
+decision ALLOW []
+sent    ['SET_MODE GUIDED', 'ARM', 'NAV_TAKEOFF 10.0']
+after   reached True  alt 10.0 m moved 0.0 m armed True mode GUIDED
+== --action goto --north 100 --alt 20
+before  fix 6 sats 10 ekf 831 battery 96% alt 10.0 m armed True mode GUIDED
+check   PASS (all goto rules hold)
+decision ALLOW []
+sent    ['SET_MODE GUIDED', 'SET_POSITION_TARGET_GLOBAL_INT 353640993 -969270000 20.0']
+after   reached True  alt 20.0 m moved 100.2 m armed True mode GUIDED
+== --action goto --north 600 --alt 20
+before  fix 6 sats 10 ekf 831 battery 85% alt 20.0 m armed True mode GUIDED
+check   FAIL (target 600.0 m from fence centre > 300.0 m)
+decision REFUSE ['verification_not_passed']
+sent    nothing
+after   reached None  alt 20.0 m moved 0.0 m armed True mode GUIDED
+== --action goto --north 50 --alt 150
+before  fix 6 sats 10 ekf 831 battery 84% alt 20.0 m armed True mode GUIDED
+check   FAIL (altitude 150.0 not within 2..120.0 m)
+decision REFUSE ['verification_not_passed']
+sent    nothing
+after   reached None  alt 20.0 m moved 0.0 m armed True mode GUIDED
+== --action disarm
+before  fix 6 sats 10 ekf 831 battery 82% alt 20.0 m armed True mode GUIDED
+check   PASS (all disarm rules hold)
+decision REFUSE ['action_not_permitted_by_policy']
+sent    nothing
+after   reached None  alt 20.0 m moved 0.0 m armed True mode GUIDED
+SIM_GPS1_GLTCH_X = 0.001
+== --action goto --north 50 --alt 20
+before  fix 6 sats 10 ekf 33599 battery 71% alt 20.0 m armed True mode GUIDED
+check   FAIL (ekf reports a gps glitch (flags 33599))
+decision REFUSE ['verification_not_passed']
+sent    nothing
+after   reached None  alt 20.0 m moved 24.2 m armed True mode GUIDED
+SIM_GPS1_GLTCH_X = 0
+SIM_GPS1_ENABLE = 0
+== --action goto --north 50 --alt 20
+before  fix 1 sats 3 ekf 167 battery 42% alt 5.9 m armed True mode LAND
+check   FAIL (gps fix 1 < 3; satellites 3 < 6; ekf has no absolute horizontal position (flags 167))
+decision REFUSE ['verification_not_passed']
+sent    nothing
+after   reached None  alt 4.6 m moved 0.0 m armed True mode LAND
+== --action land
+before  fix 1 sats 3 ekf 167 battery 41% alt 2.6 m armed True mode LAND
+check   PASS (all land rules hold)
+decision ALLOW []
+sent    ['SET_MODE LAND']
+after   reached True  alt 0.0 m moved 0.0 m armed False mode LAND
+```
+
+- **V1 confirmed.** ALLOW; 10.0 m reached.
+- **V2 confirmed.** ALLOW; arrived (within 3 m and 1.5 m of altitude), 100.2 m from where it started.
+- **V3 confirmed.** REFUSE; nothing sent; moved 0.0 m.
+- **V4 confirmed.** REFUSE on the ceiling; nothing sent.
+- **V5 confirmed.** The check passes (disarm has no vehicle-state rule) and the policy refuses it:
+  `action_not_permitted_by_policy`, nothing sent. The rule that decided is the one being tested.
+- **V10 confirmed**, where the outcome was uncertain: after a 0.001° (about 111 m) jump the EKF
+  set its GPS-glitch flag (33599 = 32768 + 831) and the goto was refused. **The vehicle moved
+  24.2 m anyway with nothing sent**: that was the autopilot responding to the glitch by itself. "Refused"
+  means the Gate sent nothing; it does not mean the vehicle stayed put.
+- **V6 confirmed, and the autopilot got there first.** Five seconds after the GPS was switched off
+  the vehicle was already in LAND at 5.9 m: ArduPilot's own failsafe had started landing it. The
+  goto was refused with the navigation failures named.
+- **V7 confirmed, with a caveat.** LAND was allowed with navigation lost and the vehicle landed and
+  disarmed. It was already landing on its own, so this shows that land is not refused for lost
+  navigation, not that the Gate's command landed it.
+- Battery fell from 100 % to 41 % across the session (simulated, at 5x speed); it stayed above the
+  30 % limit for every movement request.
+
+### V8, V9 and the tests
+
+`tests/test_vehicle_action.py`, `fake` backend (not a vehicle), 23 tests: the decisions above plus
+battery low (goto refused, land allowed), vehicle outside the fence (goto refused, RTL allowed),
+RTL with GPS off (refused), the fence edge (299 m passes, 301 m fails), unknown battery (fails),
+the verifier's re-implemented check agreeing with the tool's over 35 request/snapshot pairs, and
+the attacker cases.
+
+- **V8 confirmed.** Resealed: snapshot fix type raised fails `measurement_recomputed`; a command
+  recorded under REFUSE, a REFUSE flipped to ALLOW, the requested action changed, and the outcome
+  dropped from a run action each fail `vehicle_check_bound`. Stated limit, pinned as a test: a
+  consistent rewrite of the snapshot, its hash, the check and the decision verifies unsigned.
+- **V9 confirmed.**
+
+```
+307 passed
+vehicle_check_bound                KILLED    tests/test_vehicle_action.py::test_v8_commands_recorded_under_refuse_fail_the_binding
+VERDICT  25 of 25 KILLED, 0 SURVIVED  (396 s)
+no vacuous verification found
+```
+
+### What this does and does not show
+
+It shows the Gate governing a real autopilot's flight code (ArduPilot, in simulation): commands go
+out only under ALLOW, geofence, ceiling, navigation and battery rules refuse what they should, recovery
+is not blocked by lost navigation, and every decision can be re-checked from its package.
+
+It does not show: real hardware or a real radio link; anything about latency (one command per
+process, seconds each); anything under GNSS spoofing that keeps the receiver healthy (V11, still
+unrun, predicts the gate cannot see it); anything about defense or space use. The navigation rules
+read what the autopilot reports about itself, so they are only as good as the autopilot's estimator.
+
+Still open: V11; the same runs on the phone (ArduPilot SITL under Termux, or the phone as a companion
+computer to a real flight controller); a model proposing the request instead of an operator; a
+`nav_status` runtime field so that lost navigation DEFERs instead of REFUSEs (sv.gate/1, issue #4).

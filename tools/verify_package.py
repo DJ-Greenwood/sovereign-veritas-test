@@ -390,6 +390,83 @@ def recompute_model_answer(m, artifact):
     return m.get("output_sha256")
 
 
+# ---- a vehicle command, re-checked (tools/vehicle_action.py; docs/VEHICLE_ACTION.md) -----------------
+VEHICLE_SCHEMA = "sv.vehicle_request/0"
+VEHICLE_MOVEMENT = ("takeoff", "goto")
+EKF_POS_HORIZ_ABS, EKF_GPS_GLITCH, EKF_UNINITIALIZED = 16, 32768, 1024
+
+
+def distance_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7):
+    p1, p2 = math.radians(lat1_e7 / 1e7), math.radians(lat2_e7 / 1e7)
+    dp, dl = p2 - p1, math.radians((lon2_e7 - lon1_e7) / 1e7)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * 6371000.0 * math.asin(math.sqrt(a))
+
+
+def vehicle_check(req, snap):
+    """The check, re-implemented: movement needs fence, ceiling, navigation and battery; rtl needs
+    navigation; land and every other action need no vehicle-state rule."""
+    action, p, fence, lim = req["action"], req.get("params") or {}, req["fence"], req["limits"]
+    failures = []
+
+    def nav():
+        if snap["gps_fix_type"] < lim["min_fix_type"]:
+            failures.append(f"gps fix {snap['gps_fix_type']} < {lim['min_fix_type']}")
+        if snap["gps_sats"] < lim["min_sats"]:
+            failures.append(f"satellites {snap['gps_sats']} < {lim['min_sats']}")
+        flags = snap["ekf_flags"]
+        if flags & EKF_UNINITIALIZED or not flags & EKF_POS_HORIZ_ABS:
+            failures.append(f"ekf has no absolute horizontal position (flags {flags})")
+        if flags & EKF_GPS_GLITCH:
+            failures.append(f"ekf reports a gps glitch (flags {flags})")
+
+    if action in VEHICLE_MOVEMENT:
+        alt = p.get("alt_m")
+        if isinstance(alt, bool) or not isinstance(alt, (int, float)) or not 2 <= alt <= fence["max_alt_m"]:
+            failures.append(f"altitude {alt!r} not within 2..{fence['max_alt_m']} m")
+        here = distance_m(fence["lat_e7"], fence["lon_e7"], snap["lat_e7"], snap["lon_e7"])
+        if here > fence["radius_m"]:
+            failures.append(f"vehicle {here:.1f} m from fence centre > {fence['radius_m']} m")
+        if action == "goto":
+            if not all(isinstance(p.get(k), int) and not isinstance(p.get(k), bool) for k in ("lat_e7", "lon_e7")):
+                failures.append("goto target is not two integers (degrees * 1e7)")
+            else:
+                there = distance_m(fence["lat_e7"], fence["lon_e7"], p["lat_e7"], p["lon_e7"])
+                if there > fence["radius_m"]:
+                    failures.append(f"target {there:.1f} m from fence centre > {fence['radius_m']} m")
+        nav()
+        batt = snap["battery_pct"]
+        if batt < 0:
+            failures.append("battery remaining unknown")
+        elif batt < lim["min_battery_pct"]:
+            failures.append(f"battery {batt} % < {lim['min_battery_pct']} %")
+    elif action == "rtl":
+        nav()
+    verdict = "FAIL" if failures else "PASS"
+    return {"verdict": verdict, "why": "; ".join(failures) or f"all {action} rules hold", "failures": failures}
+
+
+def recompute_vehicle(m, artifact):
+    """The recorded output_sha256 if the request, the snapshot and the check all recompute; else why not."""
+    try:
+        req = json.loads(artifact.decode("utf-8"))
+        ok = req["schema"] == VEHICLE_SCHEMA and isinstance(req["action"], str)
+    except (ValueError, KeyError, TypeError):
+        ok = False
+    if not ok:
+        return "the artifact is not a vehicle request"
+    snap = m.get("telemetry_before")
+    if not isinstance(snap, dict) or sha(canon(snap)) != m.get("output_sha256"):
+        return "the telemetry snapshot does not hash to output_sha256"
+    try:
+        chk = vehicle_check(req, snap)
+    except (KeyError, TypeError, ValueError):
+        return "the check cannot be run on the recorded request and snapshot"
+    if chk != m.get("check"):
+        return "the recorded check does not recompute"
+    return m.get("output_sha256")
+
+
 def recompute_measurement(m, artifact):
     if m.get("kind") == "sha256_chain":
         h = artifact
@@ -398,6 +475,8 @@ def recompute_measurement(m, artifact):
         return h.hex()
     if m.get("kind") == "model_answer_check":
         return recompute_model_answer(m, artifact)
+    if m.get("kind") == "vehicle_command_check":
+        return recompute_vehicle(m, artifact)
     return None
 
 
@@ -428,6 +507,7 @@ def verify(pkg, allow_recorded_only=False):
     else:
         check("measurement_recomputed", out == m.get("output_sha256"),
               "reply re-parsed, answer re-checked" if m.get("kind") == "model_answer_check" and out == m.get("output_sha256")
+              else "snapshot re-hashed, vehicle check re-run" if m.get("kind") == "vehicle_command_check" and out == m.get("output_sha256")
               else ("recomputed from artifact bytes" if out == m.get("output_sha256") else str(out)[:80]))
 
     chain = pkg["provenance"]["chain"]
@@ -534,6 +614,29 @@ def verify(pkg, allow_recorded_only=False):
             broken.append("note hash does not match what ran")
         check("model_check_bound", not broken, "; ".join(broken) or
               f"verdict {chk.get('verdict')}, asked for {act.get('requested')!r}, note {'written' if ran else 'not written'}")
+
+    if m.get("kind") == "vehicle_command_check":
+        try:
+            req = json.loads(artifact.decode("utf-8"))
+        except ValueError:
+            req = {}
+        chk = m.get("check") if isinstance(m.get("check"), dict) else {}
+        act = rec.get("action") or {}
+        status = (rec.get("metadata") or {}).get("execution_status")
+        sent = m.get("commands_sent")
+        broken = []
+        if (rec.get("verification") or {}).get("status") != chk.get("verdict"):
+            broken.append("recorded verification is not the check's verdict")
+        if act.get("requested") != req.get("action") or (act.get("parameters") or {}) != (req.get("params") or {}):
+            broken.append("requested action or parameters are not the request's")
+        if not isinstance(sent, list):
+            broken.append("commands_sent is not a list")
+        elif sent and (dec["decision"] != "ALLOW" or status not in ("SUCCEEDED", "FAILED")):
+            broken.append(f"{len(sent)} command(s) sent under {dec['decision']} with execution {status}")
+        if (m.get("outcome") is not None) != (status == "SUCCEEDED"):
+            broken.append("an outcome is recorded exactly when the action ran")
+        check("vehicle_check_bound", not broken, "; ".join(broken) or
+              f"verdict {chk.get('verdict')}, {act.get('requested')!r}, {len(sent or [])} command(s) sent")
 
     mf = m.get("model_file")
     if mf is not None and m.get("backend") == "llama-server":

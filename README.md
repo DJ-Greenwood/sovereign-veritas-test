@@ -145,6 +145,9 @@ Details and raw output: [docs/GATE_CONSTRAINT.md](docs/GATE_CONSTRAINT.md),
 - `sovereign_veritas/evidence_states.py` — where each runtime value came from; no implicit promotion
 - `tools/model_action.py` — a local model (llama-server) proposes an action; the Gate decides; the
   package lets anyone re-check the model's answer (docs/MODEL_ACTION.md)
+- `tools/vehicle_action.py` — the Gate decides whether a flight command may be sent to a MAVLink
+  autopilot (geofence, ceiling, navigation health, battery); tested against ArduCopter in simulation
+  only, not on hardware (docs/VEHICLE_ACTION.md)
 - `tools/verifier_mutants.py` — switches off each verifier guard in turn; the tests must fail
 - `CONTRACT.md`, `contract/gate_vectors.jsonl`, `tools/gate_contract.py` — the Gate's rules, its test
   vectors, and the checker for any implementation

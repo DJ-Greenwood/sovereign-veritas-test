@@ -6,3 +6,4 @@ evidence/*.json -text
 evidence/*.sig -text
 witness/packages.log -text
 keys/allowed_signers -text
+runs/**/*.json -text
