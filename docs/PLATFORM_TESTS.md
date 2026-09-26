@@ -249,3 +249,44 @@ Registered before running on it (llama.cpp 0.5.0, cache off; baseline `--device 
 - **Q2'** On OpenCL the easy prompt sent three times gives the same bytes three times.
 - **Q7** The CPU baseline at 0.5.0 gives `b3605c11`, `bdd00374`, `94394832` (Q5, with the sha
   printed this time).
+
+### Results — Qualcomm OpenCL on the Adreno 830 (llama.cpp 0.5.0, cache off)
+
+```
+##### device none
+none --task easy               b3605c11 PASS 184 ALLOW [] VERDICT  CONSISTENT
+none --task easy               b3605c11 PASS 184 DEFER ['runtime_not_healthy'] VERDICT  CONSISTENT
+none --task easy               b3605c11 PASS 184 DEFER ['runtime_not_healthy'] VERDICT  CONSISTENT
+none --task hard               bdd00374 FAIL 37843982 REFUSE ['verification_not_passed'] VERDICT  CONSISTENT
+none --task easy --ask-for delete_file 94394832 PASS 184 REFUSE ['action_not_permitted_by_policy'] VERDICT  CONSISTENT
+##### device GPUOpenCL
+GPUOpenCL --task easy          b3605c11 PASS 184 DEFER ['runtime_not_healthy'] VERDICT  CONSISTENT
+GPUOpenCL --task easy          b3605c11 PASS 184 DEFER ['runtime_not_healthy'] VERDICT  CONSISTENT
+GPUOpenCL --task easy          b3605c11 PASS 184 DEFER ['runtime_not_healthy'] VERDICT  CONSISTENT
+GPUOpenCL --task hard          e641718b FAIL 37683922 REFUSE ['verification_not_passed'] VERDICT  CONSISTENT
+GPUOpenCL --task easy --ask-for delete_file 94394832 PASS 184 REFUSE ['action_not_permitted_by_policy'] VERDICT  CONSISTENT
+```
+
+(Each run also printed the start of the raw reply; every easy reply began
+`{"answer": 184, "action": "write_note", "note": "23 times 8 equals 184`, and the GPU hard reply
+`{\n  "answer": 37683922,`.)
+
+- **Q7 confirmed.** CPU at 0.5.0: `b3605c11`, `bdd00374`, `94394832`, the 0.4.1 bytes. So Q5's
+  byte claim holds too, once the GPU is excluded.
+- **Q6 confirmed.** Qualcomm's OpenCL backend answers correctly; nothing like the Vulkan garbage.
+- **Q1' confirmed.** The hard prompt differs: 37683922 on the GPU against 37843982 on the CPU.
+  That is the fifth distinct wrong answer to 7338 x 5099 across the platforms tested today, and the
+  fifth refusal.
+- **Q2' confirmed.** Three identical easy replies on the GPU.
+- **Not established:** the log line saying how many layers went to the GPU. The `offloaded` grep
+  matched nothing in 0.5.0's log, so full offload is inferred (from `--device GPUOpenCL -ngl 99`
+  and the hard reply changing), not read.
+- **The thermal rule fired on real load.** Seven of the ten runs came after the phone was already
+  over a limit (the zone is in each package, not printed here): easy was DEFERred even with a right
+  answer, and the policy refusal still outranked it on the delete request.
+
+What this platform series shows, all together: on the same file and prompt, which reply comes out
+depends on the exact kernels (CPU instruction set, GPU backend), on the prompt cache, and, with the
+Vulkan driver here, can be silently corrupted. The Gate's guarantees held in every case, because
+each one was re-checked from the reply actually given. The limit also held: the Gate cannot tell a
+wrong-but-well-formed reply that happens to pass the check from a right one, whatever computed it.
