@@ -25,10 +25,15 @@ K1 consistent rewrite: change declared inputs (runtime, policy, capability) AND 
    what the Gate would decide from them.
 K2 recorded-only values: elapsed_ms, artifact name, earlier chain records, a thermal zone's raw
    value together with a matching summary.
+K3 recorded observation: for a model_answer_check or vehicle_command_check package, rewrite the
+   recorded observation itself (the model's raw reply, or the vehicle's telemetry snapshot) with
+   its hash, its check and everything downstream. Only a signature binds the observation.
 (A measurement-kind downgrade used to pass; the verifier now refuses it. Try it if you like.)"""
 KNOWN_PATHS = (("decision",), ("resource_state", "runtime"), ("gate_inputs",),
                ("measurement", "elapsed_ms"),
-               ("artifact", "name"), ("resource_state", "thermal"))
+               ("artifact", "name"), ("resource_state", "thermal"),
+               ("measurement", "raw_output"), ("measurement", "telemetry_before"),  # K3
+               ("measurement", "output_sha256"), ("measurement", "check"))
 
 
 def fail(msg):
@@ -302,11 +307,11 @@ def main():
             entry.update(verdict="ACCEPTED", within_known_limits=known, paths=paths, edits=edits,
                          real_gate=gate, real_gate_agrees=agrees)
             new_accepted += 0 if known else 1
-            label = ("within known limits K1-K2" if known else
+            label = ("within known limits K1-K3" if known else
                      "REAL GATE DISAGREES WITH VERIFIER" if not agrees else
                      "OUTSIDE KNOWN LIMITS - review by hand")
             print(f"round {n}: ACCEPTED - {label}  paths {paths}")
-            feedback = ("ACCEPTED, but " + ("that is a known limit; find one outside K1-K2."
+            feedback = ("ACCEPTED, but " + ("that is a known limit; find one outside K1-K3."
                         if known else "keep going: find another."))
         messages += [{"role": "assistant", "content": text}, {"role": "user", "content": feedback}]
         log["rounds"].append(entry)
