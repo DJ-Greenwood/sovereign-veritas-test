@@ -147,7 +147,8 @@ Details and raw output: [docs/GATE_CONSTRAINT.md](docs/GATE_CONSTRAINT.md),
   package lets anyone re-check the model's answer (docs/MODEL_ACTION.md)
 - `tools/vehicle_action.py` — the Gate decides whether a flight command may be sent to a MAVLink
   autopilot (geofence, ceiling, navigation health, battery); tested against ArduCopter in simulation
-  only, not on hardware (docs/VEHICLE_ACTION.md)
+  only, not on hardware; a slow GPS spoof walked it 61 m outside its fence while every check passed
+  (V11), so it is not for GNSS-contested use (docs/VEHICLE_ACTION.md)
 - `tools/verifier_mutants.py` — switches off each verifier guard in turn; the tests must fail
 - `CONTRACT.md`, `contract/gate_vectors.jsonl`, `tools/gate_contract.py` — the Gate's rules, its test
   vectors, and the checker for any implementation

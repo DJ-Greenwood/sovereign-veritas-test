@@ -237,3 +237,60 @@ inside the 300 m fence as the vehicle believes it. The true position is read fro
 
 If V11b holds, the finding is that this gate, and any gate that reads the autopilot's own
 estimate, cannot enforce a geofence against a spoofer who moves slowly.
+
+## V11 results (ArduCopter SITL, container)
+
+`tools/sitl_drift_probe.py` ramps the offset and reads SITL's true position (`SIMSTATE`); the tool
+under test never sees it. Packages in `runs/vehicle_sitl_v11/`, each `VERDICT  CONSISTENT`.
+
+**Attempt 1, confounded, kept.** The ramp went as registered, but the simulated battery drained
+to 0 % during it (the default 3300 mAh at 5x speed), and the goto was refused for that:
+
+```
+before  fix 6 sats 10 ekf 831 battery 0% alt 20.0 m armed True mode GUIDED
+check   FAIL (battery 0 % < 30 %)
+decision REFUSE ['verification_not_passed']
+```
+
+A correct refusal that answers a different question, the same trap as MODEL_ACTION's run 1.
+**Deviation for attempt 2:** `BATT_CAPACITY` set to 30000 before take-off, so the battery rule
+could not decide. Nothing else changed.
+
+**Attempt 2:**
+
+```
+start: true 0.0 m from fence centre, believed 0.0 m, true-vs-believed 0.0 m, ekf 831
+step 25 (offset 0.00025 deg): true 27.8 m from fence centre, believed 0.0 m, true-vs-believed 27.8 m, ekf 831
+step 50 (offset 0.00050 deg): true 55.7 m from fence centre, believed 0.1 m, true-vs-believed 55.6 m, ekf 831
+step 75 (offset 0.00075 deg): true 83.5 m from fence centre, believed 0.1 m, true-vs-believed 83.4 m, ekf 831
+step 100 (offset 0.00100 deg): true 111.3 m from fence centre, believed 0.1 m, true-vs-believed 111.2 m, ekf 831
+ekf glitch flag seen at 0 of 100 steps
+after ramp +5 s: true 111.2 m from fence centre, believed 0.0 m, true-vs-believed 111.2 m, ekf 831
+== --action goto --north -250 --alt 20
+before  fix 6 sats 10 ekf 831 battery 85% alt 20.0 m armed True mode GUIDED
+check   PASS (all goto rules hold)
+decision ALLOW []
+sent    ['SET_MODE GUIDED', 'SET_POSITION_TARGET_GLOBAL_INT 353609517 -969270000 20.0']
+after   reached True  alt 20.0 m moved 250.7 m armed True mode GUIDED
+VERDICT  CONSISTENT  freshness=NOT_PROVEN  authenticity=NOT_PROVEN
+after goto: true 361.2 m from fence centre, believed 250.0 m, true-vs-believed 111.2 m, ekf 831
+```
+
+- **V11a confirmed.** The glitch flag never set (0 of 100 steps). While hovering "in place" the
+  vehicle physically flew 111 m north, holding a position that only existed in its estimate.
+- **V11b confirmed.** Fix 6, 10 satellites, EKF flags 831, battery 85 %: every rule passed; ALLOW.
+- **V11c confirmed.** The vehicle reported arriving 250 m south; it was truly **361.2 m** from the
+  fence centre, 61 m outside a 300 m fence. The package is CONSISTENT, and every word in it is what
+  the autopilot reported.
+
+**What this means.** This Gate, and any gate or geofence that reads the autopilot's own position
+estimate (ArduPilot's built-in fence included), cannot enforce a boundary against a GNSS spoofer
+who moves slowly. A consistent, verifiable package can describe a vehicle that is somewhere else.
+Nothing in this repository should be read as working in GNSS-contested conditions.
+
+What would be needed, none of it built: a position source the spoofer does not control
+(visual or radio navigation, map matching), a cross-check between it and GNSS with a registered
+disagreement threshold, and that disagreement as a runtime input the Gate can DEFER on (the
+`nav_status` field proposed for sv.gate/1). **V12 (registered, not run):** with an independent
+position source in SITL (e.g. ArduPilot's simulated visual odometry) and a 25 m disagreement rule
+in the check, the same ramp is refused before the goto, somewhere between steps 20 and 30.
