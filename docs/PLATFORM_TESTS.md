@@ -165,3 +165,28 @@ So Q1 and Q2 run on Vulkan, and the CPU baseline is re-run at 0.5.0 in the same 
 rather than compared with the 0.4.1 bytes. Q1 is then: at least one prompt differs between
 `-ngl 0` and `-ngl 99`. Added: **Q5** the CPU at 0.5.0 gives the same bytes as at 0.4.1
 (`b3605c11`, `bdd00374`, `94394832`), as the two x86 versions did.
+
+### Results — phone, llama.cpp 0.5.0 with the Vulkan and OpenCL backends installed
+
+```
+##### ngl 0
+ngl0 --task easy                   2d57c01a FAIL None REFUSE ['verification_not_passed'] gpu max 49.2 VERDICT  CONSISTENT
+ngl0 --task easy                   2d57c01a FAIL None REFUSE ['verification_not_passed'] gpu max 69.2 VERDICT  CONSISTENT
+ngl0 --task easy                   2d57c01a FAIL None REFUSE ['verification_not_passed'] gpu max 68.8 VERDICT  CONSISTENT
+ngl0 --task hard                   ae86d233 FAIL None REFUSE ['verification_not_passed'] gpu max 55.3 VERDICT  CONSISTENT
+ngl0 --task easy --ask-for delete_file 13af867b FAIL None REFUSE ['verification_not_passed'] gpu max 61.1 VERDICT  CONSISTENT
+##### ngl 99
+SERVER DIED
+libc++abi: terminating due to uncaught exception of type N2vk11SystemErrorE: vk::Device::createComputePipeline: ErrorUnknown
+```
+
+- **Q1, Q2 not runnable.** With every layer on the Adreno 830 the server aborted while building a
+  Vulkan compute pipeline, before answering anything. No GPU reply exists yet.
+- **Q5 refuted.** At `-ngl 0` the replies changed (`2d57c01a`, `ae86d233`, `13af867b`), and none
+  holds a parseable answer (`None`), not even for 23 x 8. Two things changed at once and are not
+  separated: the llama.cpp version (0.4.1 to 0.5.0), and the Vulkan backend now being loaded (with
+  `-ngl 0` llama.cpp can still send some large operations to a GPU). The raw replies were not
+  printed; they are in the packages on the phone.
+- **The Gate held.** A software upgrade silently broke the model's output format; all 15 requests
+  were REFUSEd and every package verifies. Nothing was written. This is the fail-closed property
+  doing its job on an accident nobody planned.
