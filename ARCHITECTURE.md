@@ -2,6 +2,20 @@
 
 Status: Target architecture / implementation contract
 
+**What exists in this repository today, and what is a target** (added 2026-09-26 after issue #4, B11).
+The kernel is sv.gate/0: thirteen ordered rules over a JSON record (CONTRACT.md). Everything below that
+is not listed as present here is a target, lives in another repository, or does not exist yet.
+
+| layer | in this repository | not here |
+|---|---|---|
+| 1 Evidence and trust | evidence ledger, hash-chained provenance, sv.package/0 packages, ssh signatures, a witness log, a stdlib verifier | protected artifacts beyond a signature |
+| 2 Governance | the Gate (ALLOW / DEFER / REFUSE), capabilities with one-hop parents, quality and step bounds, measured thermal state | a principal behind `authorized` (issue #4, B2), execution tokens (B9) |
+| 3 Edge intelligence | a local llama-server model proposing one action (docs/MODEL_ACTION.md); a MAVLink vehicle in simulation (docs/VEHICLE_ACTION.md) | conformal prediction, controlled synthesis, energy and latency adaptation |
+| 4 Industrial validation | none | HAI and BATADAL work lives in sentinel-hai-validation and sentinel-batadal-validation |
+| 5 Research plugins | none | Principia, QUASAR, QSleuth, QOLAS are separate repositories |
+| 6 Geometry and visualization | none | |
+| 7 Sovereign Suite | none | a separate repository |
+
 Sovereign Veritas is an evidence-first, sovereign edge-AI research platform.
 
 Core loop:

@@ -82,7 +82,9 @@ class CapabilityRegistry:
         capability = self.get(name)
         if capability is None:
             return False, [f"capability_missing:{name}"]
-        if not capability.authorized:
+        # Identity, as in the Gate: only the boolean True authorizes or satisfies evidence. This read
+        # truthiness until 2026-09-26, so "FAILED" counted as evidence (issue #4, B4).
+        if capability.authorized is not True:
             return False, [f"capability_not_authorized:{name}"]
-        missing = [key for key in capability.required_evidence if not evidence.get(key)]
+        missing = [key for key in capability.required_evidence if evidence.get(key) is not True]
         return not missing, missing

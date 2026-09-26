@@ -78,3 +78,21 @@ vacuous guard. It needs a version marker: **R3 (registered, not built)** sv.pack
 fifth statement, "gate scope: ALLOW means the recorded inputs satisfy the Gate; the verification
 status, authorization and evidence flags are written by the caller, not proven (issue #4)", and
 its verifier refuses a /1 package without it.
+
+## Results (container x86_64, Python 3.11.15)
+
+- **R1 confirmed.** `tests/test_capability_predicate.py`, 4 authorizations x 6 evidence values:
+  `24 passed` with the fix; `15 failed, 9 passed` with the fix removed. Only `authorized=True` with
+  `{"ok": True}` passes, as in the Gate.
+- **The review's trap caught its test.** The first version of that test compared
+  `evidence == {"ok": True}`, which Python holds true for `{"ok": 1}`: the B8 porting trap, inside a
+  test written to close B4. It failed one case against correct code, which is how it was found;
+  now it compares by identity.
+- **R2 confirmed.** Both implementations, after the change:
+  `conformance digest 44823d0ff707213ae8bc310ed8b21e135f8e742fd8834e8f9474743d3a250628 (expected 44823d0f…a250628)`, `VERDICT  CONFORMS`.
+- **B11 done.** ARCHITECTURE.md now opens with a table of what is in this repository and what is a
+  target or lives elsewhere.
+- Full suite `357 passed`.
+
+Still open from this response: sv.gate/1 (B1-B3, B5-B7, B9), R3 (sv.package/1 with the gate-scope
+line), and a second-author implementation.
