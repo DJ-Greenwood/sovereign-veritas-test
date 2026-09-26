@@ -4,6 +4,29 @@
 
 ## VERIFIED — automated tests
 
+**Latest (2026-09-26 evening): 364 passed** (container); verifier mutants 26 of 26 killed; vacuity_lint
+0 findings; the Gate's conformance digest unchanged (`44823d0f…0628`). What the day added, each with
+its registration and results in the named doc:
+
+- A local model proposes an action on the S25 (docs/MODEL_ACTION.md): B1-B5, B7, B8 confirmed with
+  Qwen2.5-1.5B; run 1 answered by a stale TinyLlama server, kept, and caught since by
+  `model_file_named`; replies depend on llama-server's prompt cache, now turned off per request.
+  Five run-2 packages signed and witnessed (entries 2-6).
+- Across chip vendors (docs/PLATFORM_TESTS.md): Intel instruction set changes the reply; the S25 CPU
+  reproduces the Intel SSE build byte for byte; the Adreno Vulkan path silently corrupts output
+  (every run on the phone needs `--device none` or the Vulkan backend removed); Qualcomm's OpenCL
+  path works; an NVIDIA-hosted model found that the verifier ignored unknown keys, and sv.package/0
+  is now closed (`schema_closed`). AMD, Broadcom, Cerebras: not tested (no hardware or key).
+- A simulated drone (docs/VEHICLE_ACTION.md): V1-V11 in ArduCopter SITL; a slow GPS spoof walks the
+  vehicle 61 m outside its fence with every check passing (V11); a cross-check against an
+  independent position (a stand-in, not a sensor) refuses it (V12), and flaps at its threshold
+  (V12c refuted; V13 registered). Simulation only; not for GNSS-contested use.
+- Issue #4 (docs/ISSUE_4_RESPONSE.md): all eleven breaks accepted; B4 and B11 fixed; the rest
+  assigned to sv.gate/1.
+
+Open: V13; sv.gate/1 and sv.package/1 (issue #4); B6b and a second-author implementation; G1 (record
+the server's devices in model packages).
+
 **213 passed** @ 2033088 (Termux / S25, 16.01 s). Measured thermal status on the S25: at rest `normal` -> ALLOW; after 30 s all-core load `hot` (cpu_core 103.8 °C) -> DEFER; both packages 19 of 19 checks, the verifier recomputing the status. Limits uncalibrated (policy `s25-uncalibrated-v0`). See `docs/EVIDENCE_PACKAGE.md`.
 
 Gate contract (2026-09-26, CONTRACT.md, docs/GATE_CONTRACT.md): **261 passed** (container). The kernel
