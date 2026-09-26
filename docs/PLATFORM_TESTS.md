@@ -155,3 +155,13 @@ earlier hard reply, 37847922 (`fdcde847`, MODEL_ACTION run 2), was made with the
 other requests; uncached it is 37843982, the SSE value. So B6's failure was the prompt cache and
 the x86 vector width, not "the platform" as a whole. Why the Arm path matches SSE and not AVX2 is
 not established here; a guess (both use 128-bit vectors) is not a claim.
+
+### Amendment before the GPU run (2026-09-26, nothing run on the GPU yet)
+
+Installing the GPU backends upgraded llama.cpp on the phone from 0.4.1 to 0.5.0 (the backends
+require the matching version). After the install: `Vulkan0: Adreno (TM) 830 (15209 MiB, 15209 MiB
+free)` is listed; the OpenCL backend is not usable yet (`ggml_opencl: platform IDs not available`).
+So Q1 and Q2 run on Vulkan, and the CPU baseline is re-run at 0.5.0 in the same command (`-ngl 0`)
+rather than compared with the 0.4.1 bytes. Q1 is then: at least one prompt differs between
+`-ngl 0` and `-ngl 99`. Added: **Q5** the CPU at 0.5.0 gives the same bytes as at 0.4.1
+(`b3605c11`, `bdd00374`, `94394832`), as the two x86 versions did.
