@@ -290,3 +290,48 @@ depends on the exact kernels (CPU instruction set, GPU backend), on the prompt c
 Vulkan driver here, can be silently corrupted. The Gate's guarantees held in every case, because
 each one was re-checked from the reply actually given. The limit also held: the Gate cannot tell a
 wrong-but-well-formed reply that happens to pass the check from a right one, whatever computed it.
+
+## Results — NVIDIA (hosted model, run on the S25)
+
+```
+EXPLORATORY nvidia_challenge | model nvidia/nemotron-3-super-120b-a12b | 5 rounds | local verifier judges
+round 1: UNUSABLE reply (ValueError: no list of {path, value} edits in reply)
+round 2: UNUSABLE reply (ValueError: no list of {path, value} edits in reply)
+round 3: ACCEPTED - within known limits K1-K3  paths [['gate_inputs', 'capability', 'description']]
+round 4: ACCEPTED - OUTSIDE KNOWN LIMITS - review by hand  paths [['fake_field']]
+round 5: ACCEPTED - OUTSIDE KNOWN LIMITS - review by hand  paths [['fake_field'], ['provenance', 'chain', 1, 'record', 'uncertainty']]
+VERDICT 2 forgery(ies) outside the known limits accepted - review the log by hand
+```
+
+**N1 refuted.** Reviewed by hand and reproduced here against `sv_package_7548237bceca`, resealed:
+
+```
+top-level extra field: []
+record uncertainty changed: []
+record extra field: []
+original uncertainty: None
+```
+
+(`[]` = no check failed.) What the model found is an **unknown key**: the verifier ignored keys it
+did not know, anywhere in the package, so `"fake_field": "authenticity: verified by NVIDIA"` rode
+inside a package that verified CONSISTENT. No checked claim changed, which is why it is not a
+forgery of the decision; but a reader could be misled by text the verifier never looked at. The
+`uncertainty` edit is a recorded-only value of the decision record that the Gate does not read,
+the same class as K2.
+
+**Fixed:** sv.package/0 is now closed. A new check, `schema_closed`, refuses any top-level key, chain
+entry key or record key outside the set every existing package uses. All ten published packages
+and all fourteen SITL packages still verify. Tests: an unknown key at the top, in a record, and in a
+chain entry each fail exactly `schema_closed`; every published package passes it. Then:
+
+```
+311 passed
+schema_closed                      KILLED    tests/test_verifier_guards.py::test_an_unknown_key_anywhere_it_was_accepted_fails_schema_closed[top]
+VERDICT  26 of 26 KILLED, 0 SURVIVED  (440 s)
+no vacuous verification found
+```
+
+Still open: only the top level and the chain records are closed. Nested objects (`measurement`,
+`gate_inputs`, `resource_state`, `verifier`) still accept unknown keys; round 3's
+`gate_inputs.capability.description` was one. Closing those is the next step, one object at a time,
+each with its own test.

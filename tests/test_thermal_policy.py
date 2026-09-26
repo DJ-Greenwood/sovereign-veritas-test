@@ -218,6 +218,6 @@ def test_t0_published_package_still_verifies():
     out = subprocess.run(args, capture_output=True, text=True)
     assert out.returncode == 0, out.stdout
     lines = out.stdout.splitlines()
-    assert sum(l.startswith("PASS") for l in lines) == (19 if shutil.which("ssh-keygen") else 18)
+    assert sum(l.startswith("PASS") for l in lines) == (20 if shutil.which("ssh-keygen") else 19)  # +1: schema_closed (2026-09-26)
     assert not any(l.startswith("FAIL") for l in lines)
     assert "thermal_status_derived" not in out.stdout

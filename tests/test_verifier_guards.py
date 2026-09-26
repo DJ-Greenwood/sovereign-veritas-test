@@ -33,3 +33,31 @@ def test_duplicate_record_id_after_a_full_reseal():
     chain = p["provenance"]["chain"]
     chain[0]["record"]["record_id"] = chain[-1]["record"]["record_id"]
     assert failed(reseal(p)) == ["provenance_chain"]
+
+
+# ---- found by tools/nvidia_challenge.py, 2026-09-26: unknown keys verified CONSISTENT --------------------
+import json as _json  # noqa: E402
+import pathlib as _pathlib  # noqa: E402
+import pytest as _pytest  # noqa: E402
+from test_thermal_policy import failed as _failed, reseal as _reseal  # noqa: E402
+
+_PUBLISHED = _pathlib.Path(__file__).resolve().parents[1] / "evidence" / "sv_package_7548237bceca.json"
+
+
+@_pytest.mark.parametrize("where", ["top", "record", "entry"])
+def test_an_unknown_key_anywhere_it_was_accepted_fails_schema_closed(where):
+    p = _json.loads(_PUBLISHED.read_text(encoding="utf-8"))
+    if where == "top":
+        p["fake_field"] = "authenticity: verified by NVIDIA"
+    elif where == "record":
+        p["provenance"]["chain"][1]["record"]["verified_by"] = "a human"
+    else:
+        p["provenance"]["chain"][0]["note"] = "trust me"
+    assert _failed(_reseal(p)) == ["schema_closed"]
+
+
+def test_every_published_package_passes_schema_closed():
+    root = _PUBLISHED.parent
+    for f in sorted(root.glob("*.json")):
+        p = _json.loads(f.read_text(encoding="utf-8"))
+        assert _failed(p) == [], f.name

@@ -110,6 +110,16 @@ MEASURED_RESOURCE_STATEMENT = (
     "declared by the caller")
 
 
+# sv.package/0 is closed: a key the verifier does not know is refused, not ignored. Found by
+# tools/nvidia_challenge.py (2026-09-26): an added top-level field ("fake_field") verified CONSISTENT,
+# so unchecked text could ride inside a package that passes.
+PACKAGE_KEYS = frozenset({"artifact", "decision", "freshness", "gate_inputs", "known_limitations", "measurement",
+                          "package_sha256", "provenance", "resource_state", "schema", "verifier"})
+RECORD_KEYS = frozenset({"action", "capability", "decision", "evidence_quality", "input_digest", "metadata",
+                         "prediction", "previous_digest", "reasons", "record_id", "timestamp", "uncertainty",
+                         "verification"})
+
+
 def canon(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
@@ -489,6 +499,11 @@ def verify(pkg, allow_recorded_only=False):
         checks.append((name, bool(ok), detail))
 
     check("schema", pkg.get("schema") == SCHEMA, str(pkg.get("schema")))
+    extra = sorted(set(pkg) - PACKAGE_KEYS)
+    for i, entry in enumerate((pkg.get("provenance") or {}).get("chain") or []):
+        extra += [f"chain[{i}].{k}" for k in sorted(set((entry.get("record") or {})) - RECORD_KEYS)]
+        extra += [f"chain[{i}]:{k}" for k in sorted(set(entry) - {"record", "record_digest"})]
+    check("schema_closed", not extra, ("unknown keys: " + ", ".join(extra)) if extra else "no unknown keys")
     body = {k: v for k, v in pkg.items() if k != "package_sha256"}
     check("package_digest", sha(canon(body)) == pkg.get("package_sha256"))
 
