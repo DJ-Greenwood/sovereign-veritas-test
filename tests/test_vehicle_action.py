@@ -158,3 +158,33 @@ def test_no_vehicle_is_could_not_run(tmp_path):
     p = subprocess.run([sys.executable, str(TOOL), "--link", "tcp:127.0.0.1:9", "--action", "land"],
                        capture_output=True, text=True, env=dict(os.environ, HOME=str(home)), timeout=120)
     assert p.returncode == 2 and "COULD NOT RUN" in p.stdout and not list(home.glob("sv_package_*"))
+
+
+# ---- V12: cross-check against an independent position (fake backend; SITL runs in the doc) ------------
+XC = ["--max-disagreement", "25", "--xpos-sigma", "3"]
+
+
+@pytest.mark.parametrize("scenario,flags,decision,why", [
+    ("healthy_air", ["--action", "goto", "--north", "50", "--alt", "20", *XC], "ALLOW", "all goto rules hold"),
+    ("spoofed", ["--action", "goto", "--north", "-250", "--alt", "20", *XC], "REFUSE", "disagree by 111"),
+    ("spoofed", ["--action", "rtl", *XC], "REFUSE", "disagree by 111"),
+    ("spoofed", ["--action", "land", *XC], "ALLOW", "all land rules hold"),
+    ("spoofed", ["--action", "goto", "--north", "-250", "--alt", "20"], "ALLOW", "all goto rules hold"),  # V12e
+    ("healthy_air", ["--action", "goto", "--north", "50", "--alt", "20", "--max-disagreement", "25"], "REFUSE",
+     "no independent position"),
+])
+def test_v12_cross_check(tmp_path, scenario, flags, decision, why):
+    pkg, p = run(tmp_path, scenario, *flags)
+    assert pkg is not None, p.stdout + p.stderr
+    assert pkg["decision"]["decision"] == decision and why in pkg["measurement"]["check"]["why"]
+    assert all(ok for _, ok, _ in vp.verify(pkg)), [n for n, ok, _ in vp.verify(pkg) if not ok]
+
+
+def test_v12_verifier_agrees_on_cross_check_snapshots():
+    lim = dict(LIMITS, max_nav_disagreement_m=25)
+    r = {"schema": va.REQUEST_SCHEMA, "action": "goto", "fence": FENCE, "limits": lim,
+         "params": {"alt_m": 20, "lat_e7": FENCE["lat_e7"], "lon_e7": FENCE["lon_e7"]}}
+    for dn in (0, 2000, 2300, 10000):
+        s = dict(GOOD, xpos_lat_e7=GOOD["lat_e7"] + dn, xpos_lon_e7=GOOD["lon_e7"], xpos_source="t")
+        assert va.vehicle_check(r, s) == vp.vehicle_check(r, s)
+    assert va.vehicle_check(r, GOOD) == vp.vehicle_check(r, GOOD)

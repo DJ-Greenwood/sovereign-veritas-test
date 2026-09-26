@@ -146,7 +146,7 @@ CLOSED = {
 }
 ZONE_KEYS = frozenset({"zone", "type", "domain", "raw", "status"})
 SNAPSHOT_KEYS = frozenset({"armed", "battery_pct", "ekf_flags", "gps_fix_type", "gps_sats", "lat_e7", "lon_e7",
-                           "mode", "rel_alt_mm"})
+                           "mode", "rel_alt_mm", "xpos_lat_e7", "xpos_lon_e7", "xpos_source"})
 MEASUREMENT_KEYS = {
     "sha256_chain": {"artifact_sha256", "elapsed_ms", "kind", "output_sha256", "preload_seconds", "rounds",
                      "thermal_before"},
@@ -502,6 +502,14 @@ def vehicle_check(req, snap):
             failures.append(f"ekf has no absolute horizontal position (flags {flags})")
         if flags & EKF_GPS_GLITCH:
             failures.append(f"ekf reports a gps glitch (flags {flags})")
+        if "max_nav_disagreement_m" in lim:
+            if not all(isinstance(snap.get(k), int) for k in ("xpos_lat_e7", "xpos_lon_e7")):
+                failures.append("no independent position to cross-check")
+            else:
+                gap = distance_m(snap["lat_e7"], snap["lon_e7"], snap["xpos_lat_e7"], snap["xpos_lon_e7"])
+                if gap > lim["max_nav_disagreement_m"]:
+                    failures.append(f"autopilot and independent position disagree by {gap:.1f} m "
+                                    f"> {lim['max_nav_disagreement_m']} m")
 
     if action in VEHICLE_MOVEMENT:
         alt = p.get("alt_m")

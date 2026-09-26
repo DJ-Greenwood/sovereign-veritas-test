@@ -4,6 +4,8 @@ report the TRUE position (SIMSTATE, which a real vehicle does not have) against 
 Used for V11 in docs/VEHICLE_ACTION.md. Fence centre hard-coded to the default 35.3632, -96.9270.
 
   python tools/sitl_drift_probe.py ramp        # 100 steps of 0.00001 deg, one per second
+  python tools/sitl_drift_probe.py ramp-check  # the same ramp, running the vehicle check at every step
+                                               # (V12c: independent position = truth + N(0, 3 m))
   python tools/sitl_drift_probe.py LABEL       # report once
 """
 import sys, time, math
@@ -27,7 +29,33 @@ def report(tag):
           f"true-vs-believed {d(t.lat,t.lng,g.lat,g.lon):.1f} m, ekf {e.flags}", flush=True)
 mode = sys.argv[1]
 pump(2)
-if mode == "ramp":
+if mode == "ramp-check":
+    import importlib.util, os, random
+    spec = importlib.util.spec_from_file_location("va", os.path.join(os.path.dirname(os.path.abspath(__file__)), "vehicle_action.py"))
+    va = importlib.util.module_from_spec(spec); spec.loader.exec_module(va)
+    fence = {"lat_e7": FLAT, "lon_e7": FLON, "radius_m": 300.0, "max_alt_m": 120.0}
+    req = {"schema": va.REQUEST_SCHEMA, "action": "goto", "fence": fence,
+           "params": {"alt_m": 20.0, "lat_e7": FLAT, "lon_e7": FLON},
+           "limits": {"min_fix_type": 3, "min_sats": 6, "min_battery_pct": 30, "max_nav_disagreement_m": 25.0}}
+    rng, first = random.SystemRandom(), None
+    for i in range(0, 101):
+        if i:
+            m.mav.param_set_send(m.target_system, m.target_component, b"SIM_GPS1_GLTCH_X", i*0.00001, mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+        pump(1.0)
+        t, g, e, gr, ss = (last[k] for k in ("SIMSTATE", "GLOBAL_POSITION_INT", "EKF_STATUS_REPORT", "GPS_RAW_INT", "SYS_STATUS"))
+        xl, xo = va.offset(int(t.lat), int(t.lng), rng.gauss(0, 3), rng.gauss(0, 3))
+        snap = {"gps_fix_type": gr.fix_type, "gps_sats": gr.satellites_visible, "ekf_flags": e.flags,
+                "battery_pct": ss.battery_remaining, "lat_e7": g.lat, "lon_e7": g.lon, "rel_alt_mm": g.relative_alt,
+                "armed": True, "mode": "GUIDED", "xpos_lat_e7": xl, "xpos_lon_e7": xo}
+        chk = va.vehicle_check(req, snap)
+        if chk["verdict"] == "FAIL" and first is None:
+            first = i
+            print(f"first FAIL at step {i} (offset {i*0.00001:.5f} deg): {chk['why']}", flush=True)
+        if i % 10 == 0:
+            print(f"step {i:3d}: {chk['verdict']}  {chk['why'][:90]}", flush=True)
+    print("first failing step:", first)
+    report("after ramp")
+elif mode == "ramp":
     report("start")
     glitch_seen, steps = 0, 100
     for i in range(1, steps+1):

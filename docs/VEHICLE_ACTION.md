@@ -320,3 +320,78 @@ without the limit behave exactly as before (V1-V11 unchanged).
   ALLOWed.
 - **V12e** Without the limit in the request, the same spoofed goto is ALLOWed, as in V11: the rule,
   not something else, is what refuses in V12b.
+
+## V12 results (ArduCopter SITL, container)
+
+Fresh SITL, `BATT_CAPACITY` 30000 as in V11 attempt 2. Requests with `--max-disagreement 25
+--xpos-sigma 3` carry the cross-check; the independent position is the stand-in named in every
+snapshot, `sitl-truth+noise(sigma=3m)`. Packages in `runs/vehicle_sitl_v12/`, each `VERDICT
+CONSISTENT`. Recorded disagreement per package (autopilot position vs independent position):
+
+```
+takeoff  limit 25.0  gap 4.4    ALLOW
+goto     limit 25.0  gap 8.6    ALLOW     (V12a, 50 m north, before the spoof)
+goto     limit 25.0  gap 110.2  REFUSE    (V12b, after the ramp)
+rtl      limit 25.0  gap 115.2  REFUSE    (V12d)
+goto     no limit    -          ALLOW     (V12e)
+land     limit 25.0  gap 108.7  ALLOW     (V12d)
+```
+
+The ramp, with the vehicle check run on a fresh snapshot at every step (`tools/sitl_drift_probe.py
+ramp-check`):
+
+```
+step   0: PASS  all goto rules hold
+step  10: PASS  all goto rules hold
+first FAIL at step 18 (offset 0.00018 deg): autopilot and independent position disagree by 28.0 m > 25.0 m
+step  20: PASS  all goto rules hold
+step  30: FAIL  autopilot and independent position disagree by 34.5 m > 25.0 m
+...
+step 100: FAIL  autopilot and independent position disagree by 108.4 m > 25.0 m
+first failing step: 18
+```
+
+Then the spoofed requests:
+
+```
+== --action goto --north -250 --alt 20 --max-disagreement 25 --xpos-sigma 3
+check   FAIL (autopilot and independent position disagree by 110.2 m > 25.0 m)
+decision REFUSE ['verification_not_passed']
+sent    nothing
+== --action rtl --max-disagreement 25 --xpos-sigma 3
+check   FAIL (autopilot and independent position disagree by 115.2 m > 25.0 m)
+decision REFUSE ['verification_not_passed']
+== --action goto --north -250 --alt 20
+check   PASS (all goto rules hold)
+decision ALLOW []
+after   reached True  alt 20.0 m moved 300.7 m armed True mode GUIDED
+after unguarded goto: true 361.2 m from fence centre, believed 250.0 m, true-vs-believed 111.2 m, ekf 831
+== --action land --max-disagreement 25 --xpos-sigma 3
+check   PASS (all land rules hold)
+decision ALLOW []
+after   reached True  alt 0.0 m moved 0.0 m armed False mode LAND
+```
+
+- **V12a confirmed.** Before the spoof: 4.4 m and 8.6 m, both under 10 m; both ALLOWed.
+- **V12b confirmed.** After the ramp the same goto that V11 allowed is REFUSED, the check naming a
+  110.2 m disagreement; nothing sent.
+- **V12c refuted, and the way it failed matters.** The check first failed at step 18, not between
+  20 and 30, and at step 20 it **passed again**. With σ = 3 m of noise on each axis, a disagreement
+  near 25 m crosses the limit and back from one reading to the next. A single-reading rule flaps at
+  its threshold; which request gets refused near the edge is partly chance. The prediction ignored
+  the noise it was built on.
+- **V12d confirmed.** Under the spoof RTL is REFUSED (it would navigate by the spoofed position);
+  LAND is ALLOWed.
+- **V12e confirmed.** Without the limit in the request the same goto is ALLOWed and the vehicle ends
+  361.2 m from the centre, 61 m outside the fence, exactly as in V11. The rule is what refused in
+  V12b.
+
+What this shows: given a position source the spoofer does not control, a registered disagreement
+limit turns V11's silent breach into a refusal, and the package records both positions so anyone
+can re-check it. What it does not show: that any real sensor is that source (the stand-in is SITL's
+truth plus noise; a real one has its own errors and may itself be spoofable), or anything about a
+spoofer who drifts the independent source too.
+
+**V13 (registered, not run):** requiring the disagreement to exceed the limit on 3 consecutive
+readings before refusing (and to fall below 80 % of it on 3 before allowing again) removes the
+flapping: over the same ramp, one transition from PASS to FAIL and none back.

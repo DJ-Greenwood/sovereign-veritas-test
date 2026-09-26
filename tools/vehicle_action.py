@@ -78,6 +78,14 @@ def vehicle_check(req, snap):
             failures.append(f"ekf has no absolute horizontal position (flags {flags})")
         if flags & EKF_GPS_GLITCH:
             failures.append(f"ekf reports a gps glitch (flags {flags})")
+        if "max_nav_disagreement_m" in lim:  # V12: cross-check against a position the spoofer does not control
+            if not all(isinstance(snap.get(k), int) for k in ("xpos_lat_e7", "xpos_lon_e7")):
+                failures.append("no independent position to cross-check")
+            else:
+                gap = distance_m(snap["lat_e7"], snap["lon_e7"], snap["xpos_lat_e7"], snap["xpos_lon_e7"])
+                if gap > lim["max_nav_disagreement_m"]:
+                    failures.append(f"autopilot and independent position disagree by {gap:.1f} m "
+                                    f"> {lim['max_nav_disagreement_m']} m")
 
     if action in MOVEMENT:
         alt = p.get("alt_m")
@@ -118,15 +126,19 @@ class FakeVehicle:
         "gps_off": dict(gps_fix_type=0, gps_sats=0, ekf_flags=1024 | 167, battery_pct=90, rel_alt_mm=10000, armed=True, mode="GUIDED"),
         "battery_low": dict(gps_fix_type=6, gps_sats=10, ekf_flags=831, battery_pct=12, rel_alt_mm=10000, armed=True, mode="GUIDED"),
         "outside_fence": dict(gps_fix_type=6, gps_sats=10, ekf_flags=831, battery_pct=90, rel_alt_mm=10000, armed=True, mode="GUIDED"),
+        "spoofed": dict(gps_fix_type=6, gps_sats=10, ekf_flags=831, battery_pct=90, rel_alt_mm=20000, armed=True, mode="GUIDED"),
     }
 
-    def __init__(self, scenario, fence):
+    def __init__(self, scenario, fence, xpos=False):
         if scenario not in self.SCENARIOS:
             could_not_run(f"unknown fake scenario {scenario!r}")
         s = dict(self.SCENARIOS[scenario])
         s["lat_e7"], s["lon_e7"] = fence["lat_e7"], fence["lon_e7"]
         if scenario == "outside_fence":
             s["lat_e7"] += 45000  # about 500 m north
+        if xpos:  # the independent position: where the vehicle is; in "spoofed", 111 m north of its belief
+            s["xpos_lat_e7"], s["xpos_lon_e7"] = s["lat_e7"] + (10000 if scenario == "spoofed" else 0), s["lon_e7"]
+            s["xpos_source"] = "fake-stand-in"
         self.state, self.name, self.commands = s, "fake-stand-in-not-a-vehicle", []
 
     def snapshot(self):
@@ -146,7 +158,7 @@ class FakeVehicle:
 class MavlinkVehicle:
     """Any MAVLink autopilot; tested against ArduCopter SITL only."""
 
-    def __init__(self, link, timeout_s):
+    def __init__(self, link, timeout_s, xpos_sigma=None):
         try:
             from pymavlink import mavutil
         except ImportError:
@@ -163,6 +175,9 @@ class MavlinkVehicle:
         self.m.mav.request_data_stream_send(self.m.target_system, self.m.target_component,
                                             mavutil.mavlink.MAV_DATA_STREAM_ALL, 10, 1)
         self.last = {}
+        self.xpos_sigma = xpos_sigma
+        import random
+        self.rng = random.SystemRandom()
 
     def pump(self, seconds):
         end = time.time() + seconds
@@ -173,11 +188,14 @@ class MavlinkVehicle:
             t = msg.get_type()
             if t == "HEARTBEAT" and msg.get_srcSystem() != self.m.target_system:
                 continue
-            if t in ("GPS_RAW_INT", "EKF_STATUS_REPORT", "SYS_STATUS", "GLOBAL_POSITION_INT", "HEARTBEAT", "STATUSTEXT"):
+            if t in ("GPS_RAW_INT", "EKF_STATUS_REPORT", "SYS_STATUS", "GLOBAL_POSITION_INT", "HEARTBEAT", "STATUSTEXT",
+                     "SIMSTATE"):
                 self.last[t] = msg
 
     def snapshot(self):
         need = ("GPS_RAW_INT", "EKF_STATUS_REPORT", "SYS_STATUS", "GLOBAL_POSITION_INT", "HEARTBEAT")
+        if self.xpos_sigma is not None:
+            need += ("SIMSTATE",)
         self.last = {}
         end = time.time() + 15
         while time.time() < end and not all(k in self.last for k in need):
@@ -185,12 +203,19 @@ class MavlinkVehicle:
         missing = [k for k in need if k not in self.last]
         if missing:
             could_not_run(f"no telemetry for {missing}")
-        g, e, s, pos, hb = (self.last[k] for k in need)
+        g, e, s, pos, hb = (self.last[k] for k in need[:5])
         mode = self.mavutil.mode_string_v10(hb)
-        return {"gps_fix_type": int(g.fix_type), "gps_sats": int(g.satellites_visible), "ekf_flags": int(e.flags),
+        snap = {"gps_fix_type": int(g.fix_type), "gps_sats": int(g.satellites_visible), "ekf_flags": int(e.flags),
                 "battery_pct": int(s.battery_remaining), "lat_e7": int(pos.lat), "lon_e7": int(pos.lon),
                 "rel_alt_mm": int(pos.relative_alt),
                 "armed": bool(hb.base_mode & self.mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED), "mode": mode}
+        if self.xpos_sigma is not None:
+            # STAND-IN, NOT A SENSOR: SITL's true position plus Gaussian noise (docs/VEHICLE_ACTION.md, V12).
+            t, sg = self.last["SIMSTATE"], self.xpos_sigma
+            dn, de = self.rng.gauss(0, sg), self.rng.gauss(0, sg)
+            snap["xpos_lat_e7"], snap["xpos_lon_e7"] = offset(int(t.lat), int(t.lng), dn, de)
+            snap["xpos_source"] = f"sitl-truth+noise(sigma={sg:g}m)"
+        return snap
 
     def _mode(self, name):
         self.m.set_mode(name)
@@ -302,6 +327,10 @@ def main():
     ap.add_argument("--min-fix", type=int, default=3)
     ap.add_argument("--min-sats", type=int, default=6)
     ap.add_argument("--min-battery", type=int, default=30)
+    ap.add_argument("--max-disagreement", type=float, default=None,
+                    help="metres; require an independent position within this distance of the autopilot's (V12)")
+    ap.add_argument("--xpos-sigma", type=float, default=None,
+                    help="SITL only: read an independent position as true position + N(0, sigma) m, a stand-in")
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--thermal-status", default="measured")
     ap.add_argument("--thermal-root", default="/sys/class/thermal")
@@ -318,12 +347,14 @@ def main():
         params["lat_e7"], params["lon_e7"] = offset(fence["lat_e7"], fence["lon_e7"], a.north, a.east)
     req = {"schema": REQUEST_SCHEMA, "action": a.action, "params": params, "fence": fence,
            "limits": {"min_fix_type": a.min_fix, "min_sats": a.min_sats, "min_battery_pct": a.min_battery}}
+    if a.max_disagreement is not None:
+        req["limits"]["max_nav_disagreement_m"] = a.max_disagreement
     artifact = canonical_json(req).encode("utf-8")
 
     if a.link.startswith("fake:"):
-        vehicle, backend = FakeVehicle(a.link[5:], fence), "fake"
+        vehicle, backend = FakeVehicle(a.link[5:], fence, xpos=a.xpos_sigma is not None), "fake"
     else:
-        vehicle, backend = MavlinkVehicle(a.link, a.timeout), "mavlink"
+        vehicle, backend = MavlinkVehicle(a.link, a.timeout, a.xpos_sigma), "mavlink"
     zones = read_zones(a.thermal_root)
     snap = vehicle.snapshot()
     chk = vehicle_check(req, snap)
@@ -340,7 +371,8 @@ def main():
     registry = VerifierRegistry(min_coverage=0.5)
     registry.register(VERIFIER_ID, verifier)
     probe_req = dict(req, action="goto", params={"alt_m": 20, "lat_e7": fence["lat_e7"], "lon_e7": fence["lon_e7"]})
-    good = FakeVehicle.SCENARIOS["healthy_air"] | {"lat_e7": fence["lat_e7"], "lon_e7": fence["lon_e7"]}
+    good = FakeVehicle.SCENARIOS["healthy_air"] | {"lat_e7": fence["lat_e7"], "lon_e7": fence["lon_e7"],
+                                                   "xpos_lat_e7": fence["lat_e7"], "xpos_lon_e7": fence["lon_e7"]}
     for s, want in ((good, "PASS"), (dict(good, gps_fix_type=0), "FAIL")):  # the check must be able to fail
         registry.record_probe(VERIFIER_ID, passed=vehicle_check(probe_req, s)["verdict"] == want)
 
