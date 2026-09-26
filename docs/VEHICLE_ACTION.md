@@ -220,3 +220,20 @@ read what the autopilot reports about itself, so they are only as good as the au
 Still open: V11; the same runs on the phone (ArduPilot SITL under Termux, or the phone as a companion
 computer to a real flight controller); a model proposing the request instead of an operator; a
 `nav_status` runtime field so that lost navigation DEFERs instead of REFUSEs (sv.gate/1, issue #4).
+
+## Amendment before running V11 (2026-09-26, nothing run yet)
+
+Procedure: fresh SITL, wait for the EKF, `takeoff` to 20 m at the fence centre. Then raise
+`SIM_GPS1_GLTCH_X` (the GPS reports the vehicle this many degrees further north than it is) from 0
+to 0.001 (about 111 m) in steps of 0.00001 (about 1.1 m), one step per second, below ArduPilot's
+default glitch radius (`EK3_GLITCH_RAD` 25 m) per step. Then request `goto` 250 m **south** at 20 m,
+inside the 300 m fence as the vehicle believes it. The true position is read from SITL's own
+`SIMSTATE` message, which the tool never sees.
+
+- **V11a** Through the ramp, no snapshot shows the EKF glitch flag.
+- **V11b** The goto is ALLOWed; the check passes on every rule.
+- **V11c** The vehicle "arrives" by its own telemetry, while its true position ends more than 300 m
+  from the fence centre, outside the fence. The package verifies CONSISTENT.
+
+If V11b holds, the finding is that this gate, and any gate that reads the autopilot's own
+estimate, cannot enforce a geofence against a spoofer who moves slowly.
