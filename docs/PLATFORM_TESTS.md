@@ -221,3 +221,31 @@ Consequences, stated plainly:
   **G1 (registered, not built):** `model_action.py` records the server's device list (from its
   startup log or an API, if llama-server exposes one) so a package shows whether a GPU was in the
   path.
+
+### Qualcomm's OpenCL backend reached (2026-09-26), and an amendment before running on it
+
+Getting there, in order: the OpenCL loader (ocl-icd) found no platform because `qualcomm.icd`
+pointed at the loader itself; the real driver `/vendor/lib64/libOpenCL_adreno.so` exports no
+`clIcdGetPlatformIDsKHR`, so ocl-icd skips it; and Android refuses to load `/vendor/lib64` libraries
+into an app ("is not accessible for the namespace"), while `/data` is permitted. What worked: copy
+the vendor loader `libOpenCL.so`, `libOpenCL_adreno.so` and its runtime libraries (libgsl,
+libadreno_utils, libadreno_compiler_cl, libllvm-qcom, libCB, libadreno_app_profiles,
+libq3dtools_adreno) into `~/.adreno-cl` and run with `LD_LIBRARY_PATH=$HOME/.adreno-cl`. A planned
+binary patch of the loader turned out unnecessary (`occurrences 0`: the path string was not there;
+the copy was left unmodified). A first copy that also took Android's `libc++.so`, `libbase.so` and
+`libcutils.so` broke llama.cpp's own loading and was undone. Then:
+
+```
+Available devices:
+  Vulkan0: Adreno (TM) 830 (15209 MiB, 15209 MiB free)
+  GPUOpenCL: QUALCOMM Adreno(TM) 830 (5556 MiB, 4532 MiB free)
+```
+
+Registered before running on it (llama.cpp 0.5.0, cache off; baseline `--device none`, test
+`--device GPUOpenCL -ngl 99`):
+
+- **Q6** On OpenCL the easy reply passes the check: not corrupted as on Vulkan.
+- **Q1'** At least one of the three prompts gives different bytes on OpenCL than on the CPU.
+- **Q2'** On OpenCL the easy prompt sent three times gives the same bytes three times.
+- **Q7** The CPU baseline at 0.5.0 gives `b3605c11`, `bdd00374`, `94394832` (Q5, with the sha
+  printed this time).
