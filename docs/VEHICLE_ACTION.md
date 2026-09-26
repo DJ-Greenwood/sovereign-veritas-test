@@ -294,3 +294,29 @@ disagreement threshold, and that disagreement as a runtime input the Gate can DE
 `nav_status` field proposed for sv.gate/1). **V12 (registered, not run):** with an independent
 position source in SITL (e.g. ArduPilot's simulated visual odometry) and a 25 m disagreement rule
 in the check, the same ramp is refused before the goto, somewhere between steps 20 and 30.
+
+## Amendment before building V12 (2026-09-26, nothing built yet)
+
+**Deviation from V12 as registered:** the independent position source is not ArduPilot's simulated
+visual odometry. It is a stand-in: SITL's true position (`SIMSTATE`) plus Gaussian noise, σ = 3 m
+per axis, recorded in the package as `sitl-truth+noise(sigma=3m)`, **not a sensor**. It stands in
+for anything the GNSS spoofer does not control (visual or radio navigation, a ground tracker).
+Real sources have their own failure modes, and some can be spoofed too; this tests the Gate's rule,
+not a sensor.
+
+Design: the request may carry `limits.max_nav_disagreement_m`. When it does, the snapshot must hold
+an independent position (`xpos_lat_e7`, `xpos_lon_e7`), and every rule that needs navigation
+(`takeoff`, `goto`, `rtl`) fails if the autopilot's position and the independent one are further
+apart than the limit, or if the independent position is missing. `land` stays ungated. Requests
+without the limit behave exactly as before (V1-V11 unchanged).
+
+- **V12a (anti-vacuity)** No spoof, limit 25 m: a `goto` inside the fence is ALLOWed; the recorded
+  disagreement is under 10 m.
+- **V12b** The V11 ramp (0.001°, 100 steps), then the same `goto` 250 m south: REFUSED, the check
+  naming the disagreement; nothing sent.
+- **V12c** Running the check on a snapshot at every step of the ramp, it first fails between steps
+  20 and 30.
+- **V12d** Under the spoof, `rtl` is REFUSED (it navigates by the spoofed position) and `land` is
+  ALLOWed.
+- **V12e** Without the limit in the request, the same spoofed goto is ALLOWed, as in V11: the rule,
+  not something else, is what refuses in V12b.
