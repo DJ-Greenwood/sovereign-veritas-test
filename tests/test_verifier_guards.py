@@ -61,3 +61,40 @@ def test_every_published_package_passes_schema_closed():
     for f in sorted(root.glob("*.json")):
         p = _json.loads(f.read_text(encoding="utf-8"))
         assert _failed(p) == [], f.name
+
+
+# ---- nested objects closed too (2026-09-26) -----------------------------------------------------------
+_VEHICLE = _pathlib.Path(__file__).resolve().parents[1] / "runs" / "vehicle_sitl" / "sv_package_98b78fd97e64.json"
+
+
+def _add(pkg, path, key="injected"):
+    obj = pkg
+    for part in path:
+        obj = obj[part]
+    obj[key] = "unchecked text"
+    return pkg
+
+
+@_pytest.mark.parametrize("source,path", [
+    (_PUBLISHED, ("artifact",)), (_PUBLISHED, ("decision",)), (_PUBLISHED, ("freshness",)),
+    (_PUBLISHED, ("gate_inputs",)), (_PUBLISHED, ("gate_inputs", "capability")), (_PUBLISHED, ("gate_inputs", "policy")),
+    (_PUBLISHED, ("resource_state",)), (_PUBLISHED, ("resource_state", "runtime")),
+    (_PUBLISHED, ("resource_state", "runtime", "metadata")), (_PUBLISHED, ("resource_state", "thermal")),
+    (_PUBLISHED, ("resource_state", "thermal_policy")), (_PUBLISHED, ("resource_state", "thermal", "zones", 0)),
+    (_PUBLISHED, ("verifier",)), (_PUBLISHED, ("verifier", "validation")), (_PUBLISHED, ("measurement",)),
+    (_PUBLISHED, ("measurement", "params")), (_PUBLISHED, ("measurement", "model_file")),
+    (_PUBLISHED, ("measurement", "thermal_before", 0)),
+    (_VEHICLE, ("measurement",)), (_VEHICLE, ("measurement", "outcome")), (_VEHICLE, ("measurement", "telemetry_after")),
+])
+def test_an_unknown_key_in_a_closed_nested_object_fails_schema_closed(source, path):
+    p = _json.loads(source.read_text(encoding="utf-8"))
+    assert _failed(p) == [], "the untouched package must verify"
+    assert _failed(_reseal(_add(p, path))) == ["schema_closed"]
+
+
+def test_every_run_package_passes_schema_closed():
+    root = _PUBLISHED.parents[1] / "runs"
+    files = sorted(root.rglob("*.json"))
+    assert len(files) >= 14
+    for f in files:
+        assert _failed(_json.loads(f.read_text(encoding="utf-8"))) == [], f.name

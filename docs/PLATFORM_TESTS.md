@@ -342,3 +342,29 @@ On the S25 after pulling the fix, the signed, witnessed package:
 PASS  schema_closed                      no unknown keys
 VERDICT  CONSISTENT  freshness=LATEST_WITNESSED(6)  authenticity=SIGNED:holland202
 ```
+
+### Nested objects closed too (same day)
+
+`schema_closed` now also refuses unknown keys inside `artifact`, `decision`, `freshness`,
+`gate_inputs` (and its capability, registry entries and policy), `resource_state` (runtime and its
+metadata, thermal, each thermal zone, thermal policy), `verifier` and its validation, and
+`measurement`, closed per kind (`sha256_chain`, `model_answer_check`, `vehicle_command_check`),
+including its params, model file, outcome, telemetry snapshots and zones.
+
+Left open on purpose, each for a stated reason: record `metadata` (free-form by contract), action
+`parameters` (bound by `model_check_bound` and `vehicle_check_bound`), the thermal `summary`
+(recomputed and compared whole), and the `check` objects (compared whole with their
+recomputation, so an extra key already fails `measurement_recomputed`).
+
+Round 3's edit, `gate_inputs.capability.description`, is a key sv.package/0 defines; the model
+changed its value, a declared input that the Gate does not read (K1). Closing the schema does not
+and should not refuse that.
+
+```
+333 passed
+21 nested locations: an injected key fails exactly schema_closed (tests/test_verifier_guards.py)
+with the nested part removed (one line): 21 failed, 8 passed
+all 22 packages (evidence/ and runs/): PASS  schema_closed
+VERDICT  26 of 26 KILLED, 0 SURVIVED  (433 s)
+no vacuous verification found
+```

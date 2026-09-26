@@ -120,6 +120,79 @@ RECORD_KEYS = frozenset({"action", "capability", "decision", "evidence_quality",
                          "verification"})
 
 
+# Nested objects, closed the same way (2026-09-26, after nvidia_challenge round 3 added
+# gate_inputs.capability.description, a key that exists, so it was not caught by name; see below).
+# Deliberately left open, because their content is checked or bound elsewhere, or is free-form by
+# contract: record metadata, action parameters (bound by model_check_bound / vehicle_check_bound),
+# the thermal summary (recomputed and compared whole), and the check objects (compared whole with
+# their recomputation).
+CAPABILITY_KEYS = frozenset({"authorized", "description", "max_steps", "min_evidence_quality", "name", "parent",
+                             "required_evidence"})
+CLOSED = {
+    "artifact": {"bytes_b64", "name", "sha256"},
+    "decision": {"decision", "reasons"},
+    "freshness": {"status", "witness"},
+    "gate_inputs": {"capability", "capability_registry", "policy"},
+    "gate_inputs.policy": {"allow_only"},
+    "resource_state": {"evidence_states", "runtime", "thermal", "thermal_policy"},
+    "resource_state.runtime": {"compute_budget", "metadata", "platform", "power_status", "python_version",
+                               "thermal_status"},
+    "resource_state.runtime.metadata": {"thermal_policy", "thermal_status_source"},
+    "resource_state.thermal": {"summary", "zones"},
+    "resource_state.thermal_policy": {"id", "limits_mdeg", "snapshot"},
+    "verifier": {"identity_bound", "validation", "verifier_id"},
+    "verifier.validation": {"failed_probes", "meaningful_passes", "meaningful_probes", "min_coverage", "status",
+                            "total_probes", "verifier_id"},
+}
+ZONE_KEYS = frozenset({"zone", "type", "domain", "raw", "status"})
+SNAPSHOT_KEYS = frozenset({"armed", "battery_pct", "ekf_flags", "gps_fix_type", "gps_sats", "lat_e7", "lon_e7",
+                           "mode", "rel_alt_mm"})
+MEASUREMENT_KEYS = {
+    "sha256_chain": {"artifact_sha256", "elapsed_ms", "kind", "output_sha256", "preload_seconds", "rounds",
+                     "thermal_before"},
+    "model_answer_check": {"artifact_sha256", "backend", "check", "elapsed_ms", "kind", "model_file", "model_id",
+                           "note_sha256", "output_sha256", "params", "preload_seconds", "raw_output",
+                           "thermal_before"},
+    "vehicle_command_check": {"artifact_sha256", "backend", "check", "commands_sent", "kind", "outcome",
+                              "output_sha256", "telemetry_after", "telemetry_before", "thermal_before", "vehicle"},
+}
+MODEL_PARAMS = frozenset({"temperature", "seed", "max_tokens", "cache_prompt", "scripted"})
+
+
+def unknown_nested_keys(pkg):
+    """Every key in a closed nested object that sv.package/0 does not define, as 'path.key'."""
+    found = []
+
+    def closed(obj, allowed, path):
+        if isinstance(obj, dict):
+            found.extend(f"{path}.{k}" for k in sorted(set(obj) - set(allowed)))
+
+    for path, allowed in CLOSED.items():
+        obj = pkg
+        for part in path.split("."):
+            obj = obj.get(part) if isinstance(obj, dict) else None
+        closed(obj, allowed, path)
+    gi = pkg.get("gate_inputs") if isinstance(pkg.get("gate_inputs"), dict) else {}
+    closed(gi.get("capability"), CAPABILITY_KEYS, "gate_inputs.capability")
+    if isinstance(gi.get("capability_registry"), dict):
+        for name, cap in gi["capability_registry"].items():
+            closed(cap, CAPABILITY_KEYS, f"gate_inputs.capability_registry.{name}")
+    m = pkg.get("measurement") if isinstance(pkg.get("measurement"), dict) else {}
+    if m.get("kind") in MEASUREMENT_KEYS:
+        closed(m, MEASUREMENT_KEYS[m["kind"]], "measurement")
+    closed(m.get("model_file"), {"claim", "name", "sha256", "size"}, "measurement.model_file")
+    closed(m.get("params"), MODEL_PARAMS, "measurement.params")
+    closed(m.get("outcome"), {"reached"}, "measurement.outcome")
+    for snap in ("telemetry_before", "telemetry_after"):
+        closed(m.get(snap), SNAPSHOT_KEYS, f"measurement.{snap}")
+    th = (pkg.get("resource_state") or {}).get("thermal") if isinstance(pkg.get("resource_state"), dict) else None
+    for where, zones in (("measurement.thermal_before", m.get("thermal_before")),
+                         ("resource_state.thermal.zones", th.get("zones") if isinstance(th, dict) else None)):
+        for i, z in enumerate(zones if isinstance(zones, list) else []):
+            closed(z, ZONE_KEYS, f"{where}[{i}]")
+    return found
+
+
 def canon(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
@@ -503,7 +576,9 @@ def verify(pkg, allow_recorded_only=False):
     for i, entry in enumerate((pkg.get("provenance") or {}).get("chain") or []):
         extra += [f"chain[{i}].{k}" for k in sorted(set((entry.get("record") or {})) - RECORD_KEYS)]
         extra += [f"chain[{i}]:{k}" for k in sorted(set(entry) - {"record", "record_digest"})]
-    check("schema_closed", not extra, ("unknown keys: " + ", ".join(extra)) if extra else "no unknown keys")
+    extra += unknown_nested_keys(pkg)
+    check("schema_closed", not extra, ("unknown keys: " + ", ".join(extra[:8]) + (" ..." if len(extra) > 8 else ""))
+          if extra else "no unknown keys")
     body = {k: v for k, v in pkg.items() if k != "package_sha256"}
     check("package_digest", sha(canon(body)) == pkg.get("package_sha256"))
 
