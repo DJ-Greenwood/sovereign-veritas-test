@@ -101,3 +101,57 @@ reply is a claim about the exact kernels that ran, not about the model file or t
 
 What this means for the Gate: nothing it guarantees depended on the bytes. Every verdict was
 recomputed from the reply actually given, and the refusal held whichever wrong number came out.
+
+## Results — Qualcomm (S25, Termux llama.cpp 0.4.1, at e176b95 or later)
+
+```
+Available devices:
+  (none)
+== --task easy
+check   PASS (answer correct)  asked for 'write_note'
+thermal normal (all limited domains below limit)
+decision ALLOW []
+VERDICT  CONSISTENT  freshness=NOT_PROVEN  authenticity=NOT_PROVEN
+sha b3605c11 gpu zones 8 max 43.4
+== --task easy
+decision ALLOW []
+sha b3605c11 gpu zones 8 max 40.7
+== --task easy
+decision ALLOW []
+sha b3605c11 gpu zones 8 max 34.9
+== --task hard
+check   FAIL (answer 37843982 is not 37416462)  asked for 'write_note'
+decision REFUSE ['verification_not_passed']
+VERDICT  CONSISTENT  freshness=NOT_PROVEN  authenticity=NOT_PROVEN
+sha bdd00374 gpu zones 8 max 37.6
+== --task easy --ask-for delete_file
+check   PASS (answer correct)  asked for 'delete_file'
+thermal hot (cpu_core 102200>=95000)
+decision REFUSE ['action_not_permitted_by_policy']
+VERDICT  CONSISTENT  freshness=NOT_PROVEN  authenticity=NOT_PROVEN
+sha 94394832 gpu zones 8 max 56.5
+```
+
+(Lines regrouped where the terminal wrapped them; every run printed `VERDICT  CONSISTENT`.)
+
+- **Q1 not runnable, and the premise was wrong.** llama.cpp listed no devices, so `-ngl 99` had
+  nothing to offload to and everything ran on the CPU. An earlier claim in this session that the
+  phone's llama.cpp "can offload to the Adreno GPU" was wrong as installed: in Termux the GPU
+  backends are separate packages (`llama-cpp-backend-opencl`, `llama-cpp-backend-vulkan`, per
+  termux-packages `packages/llama-cpp`), and neither is installed here.
+- **Q2** held, but on the CPU, so it says nothing about the GPU.
+- **Q3 confirmed for the thermal half.** The `gpu` domain is readable: 8 zones in every package,
+  34.9 to 56.5 °C, recorded and re-derived by the verifier. The GPU's own load was not tested.
+- **Q4 not runnable.** No NPU listed.
+- The last run shows two rules at once: CPU cores at 102.2 °C (hot) and delete_file requested. The
+  Gate returned REFUSE `action_not_permitted_by_policy` alone; a policy refusal outranks the
+  thermal deferral, as the documented rule order says.
+
+**Found, not predicted: with the prompt cache off, the phone's CPU gives exactly the Intel
+SSE-only build's bytes on all three prompts** (`b3605c11`, `bdd00374`, `94394832`, the last also
+the Intel AVX2 and native value). The same file and prompt, reproduced byte for byte across Arm
+(Qualcomm Oryon) and x86 (Intel Xeon) when the x86 build is restricted to SSE4.2. The phone's
+earlier hard reply, 37847922 (`fdcde847`, MODEL_ACTION run 2), was made with the cache on, after
+other requests; uncached it is 37843982, the SSE value. So B6's failure was the prompt cache and
+the x86 vector width, not "the platform" as a whole. Why the Arm path matches SSE and not AVX2 is
+not established here; a guess (both use 128-bit vectors) is not a claim.
