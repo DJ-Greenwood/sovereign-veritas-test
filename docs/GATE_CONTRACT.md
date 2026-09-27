@@ -275,3 +275,25 @@ for Chad Holland), so B10 stays open.
   port reproduces the conformance digest `44823d0f…0628`.
 - **C6c** If a fix needs anything CONTRACT.md does not say, that is a defect in the contract. It is
   recorded as such, and the contract text is amended in the same commit.
+
+### C6 results (container x86_64, Go 1.24.7, 2026-09-27)
+
+```
+python tools/gate_contract.py --check-command <go build of ports/go>
+conformance digest 44823d0ff707213ae8bc310ed8b21e135f8e742fd8834e8f9474743d3a250628  (expected 44823d0ff707213ae8bc310ed8b21e135f8e742fd8834e8f9474743d3a250628)
+VERDICT  CONFORMS
+```
+
+- **C6a: the first run had 0 mismatches.** The port conformed on its first run, with no fixes.
+- **C6b held** without any fix, so there were no fixes to cite.
+- **C6c: no contract defect found.**
+- **Anti-vacuity.** A copy of the port with Go's `==` in place of Python equality in rule 13 gave
+  `VERDICT  1 of 4690 vectors differ`: `X:requested=1, allow_only=[true]`, expected ALLOW, got REFUSE.
+  The checker can fail a port.
+
+**A disclosure that weakens C6.** The registration says "written from CONTRACT.md alone". Earlier in
+the same session, while building the attack harness, the author had read `replay_gate` in
+`tools/verify_package.py` (the Python Gate). So the port was not written blind to the Python. What
+C6 does show: the traps the contract names all come out right in a language where each one differs
+by default. That includes Python truthiness, Python equality, big integers, `repr` of a double, and
+round-half-even at four places. The CI job `port-go` now reruns the check on every push.

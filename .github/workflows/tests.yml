@@ -37,6 +37,20 @@ jobs:
           f=$(awk '/^package /{print $2}' measured.txt)
           python tools/verify_package.py "$f"
 
+  port-go:
+    # C6 (docs/GATE_CONTRACT.md): the Go port of sv.gate/0 must reproduce the conformance digest.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - run: go build -o svgate ./ports/go
+      - run: python tools/gate_contract.py --check-command ./svgate
+
   red-team:
     # Checks that the checks can fail (docs/INTEGRATION.md, I1 and I3). One runner is enough: these
     # test the verifier's and the Gate's own guards, not the platform.
