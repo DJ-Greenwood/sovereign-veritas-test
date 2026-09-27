@@ -368,3 +368,8 @@ all 22 packages (evidence/ and runs/): PASS  schema_closed
 VERDICT  26 of 26 KILLED, 0 SURVIVED  (433 s)
 no vacuous verification found
 ```
+
+Closing state on the S25 (2026-09-26 evening): `llama-cpp-backend-vulkan` uninstalled
+(`Removing llama-cpp-backend-vulkan (0.5.0) ...`), so a plain llama-server run no longer reaches the
+corrupting Vulkan path. llama.cpp stays at 0.5.0 with the OpenCL backend; Qualcomm's OpenCL is used
+only with `LD_LIBRARY_PATH=$HOME/.adreno-cl`.
