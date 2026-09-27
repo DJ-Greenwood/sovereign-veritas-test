@@ -16,7 +16,7 @@ show it works, so it can be registered before it is built.
 | G1-7 | B5: walk the full grant chain; a cycle or gap refuses | one-hop check today | chains of length 1, 3 and a cycle; the cycle and a missing link refuse |
 
 **Order.** G1-3 and G1-4 first: they close attacks the harness can already measure (G1-4 needs a new
-attack class, A8 "drain", added to the harness before the rule is built). Then G1-1 and G1-2, which
+attack class, "drain", added to the harness before the rule is built; A8-A10 were used for round 2). Then G1-1 and G1-2, which
 need SITL. G1-5 to G1-7 change the package schema, so they go together as sv.package/1.
 
 **Not in scope.** Judging intent with a language model, the way the Google post's Semantic Governance
