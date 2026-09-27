@@ -256,3 +256,22 @@ VERDICT  CONFORMS
 **C5 confirmed on the S25.** The same conformance digest on Android/aarch64 and on the nine CI jobs
 (Linux, macOS, Windows; Python 3.10, 3.12, 3.14). Both implementations are still the author's; the
 open item is an implementation by someone else.
+
+## C6: a port to a second language, written from CONTRACT.md only (registered 2026-09-27, before the port)
+
+**What.** `ports/go/gate.go` is a Go implementation of `sv.gate/0`, standard library only, written
+from `CONTRACT.md` alone. It does not read the Python source. It is checked with
+`python tools/gate_contract.py --check-command go run ./ports/go`.
+
+**What it can show.** Whether the contract as written is enough to port the Gate into a language whose
+JSON, number formatting and equality differ from Python's. Those are the porting traps CONTRACT.md
+names. **What it cannot show.** Independence: the port is by the same author as the Python (Claude,
+for Chad Holland), so B10 stays open.
+
+**Registered.**
+- **C6a** Every mismatch on the *first* run of the port is recorded here with its cause, before any fix.
+  A first run with zero mismatches is recorded as that.
+- **C6b** After fixes made only from what CONTRACT.md says (each fix cites a line of the contract), the
+  port reproduces the conformance digest `44823d0f…0628`.
+- **C6c** If a fix needs anything CONTRACT.md does not say, that is a defect in the contract. It is
+  recorded as such, and the contract text is amended in the same commit.
