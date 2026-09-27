@@ -24,7 +24,7 @@ name for its model must end in that file's name, or the run stops (COULD NOT RUN
 one: it answers as --scripted says and asks for whatever --ask-for names.
 Exit: 0 a package was written, whatever the Gate decided | 2 could not run (no server, no reply)
 """
-import argparse, hashlib, json, os, platform, subprocess, sys, time, urllib.error, urllib.request
+import argparse, hashlib, json, os, platform, re, subprocess, sys, time, urllib.error, urllib.request
 
 sys.dont_write_bytecode = True
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,6 +147,24 @@ def ask_llama(server, model_id, prompt, seed, max_tokens):
     return raw, model_id, round((time.perf_counter() - t0) * 1000, 3), params
 
 
+def server_devices(log_path):
+    """G1: which compute devices the llama-server used, read from its own startup log. Returns a short
+    string (for example 'CPU' or 'GPUOpenCL: QUALCOMM Adreno(TM) 830'), or 'not recorded' without a log."""
+    if not log_path:
+        return "not recorded"
+    try:
+        with open(os.path.expanduser(log_path), encoding="utf-8", errors="replace") as fh:
+            head = fh.read(200_000)
+    except OSError:
+        return "not recorded (log unreadable)"
+    found = []
+    for pat in (r"using device (\S+) \(([^)]*)\)", r"ggml_opencl: device: '([^']*)'", r"(Vulkan\d+): ([^\n(]+)",
+                r"offloaded (\d+/\d+) layers to GPU"):
+        for m in re.finditer(pat, head):
+            found.append(" ".join(x.strip() for x in m.groups()))
+    return "; ".join(dict.fromkeys(found)) if found else "CPU (no GPU device lines in the server log)"
+
+
 def ask_scripted(task, how, ask_for):
     if how == "garbage":
         raw = "I think the answer is probably quite large."
@@ -226,6 +244,7 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=160)
     ap.add_argument("--sandbox", default=os.path.join(os.path.expanduser("~"), "sv_sandbox"))
     ap.add_argument("--model-file", default=None)
+    ap.add_argument("--server-log", default=None, help="the llama-server log, to record its devices (G1)")
     a = ap.parse_args()
     model_file = None
     if a.model_file:
@@ -255,6 +274,7 @@ def main():
     zones = zones_under_load(a.preload_seconds, a.thermal_root) if a.preload_seconds > 0 else read_zones(a.thermal_root)
     if a.model == "llama":
         raw, model_id, elapsed, params = ask_llama(a.server.rstrip("/"), model_id, prompt, a.seed, a.max_tokens)
+        params = dict(params, server_devices=server_devices(a.server_log))  # recorded, not sent to the server
     else:
         raw, model_id, elapsed, params = ask_scripted(task, a.scripted, a.ask_for)
     chk = check(task, raw)

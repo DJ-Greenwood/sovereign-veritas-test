@@ -61,6 +61,26 @@ def distance_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7):
     return 2 * EARTH_R * math.asin(math.sqrt(a))
 
 
+class DisagreementLatch:
+    """V13: hysteresis on the independent-position cross-check, so one noisy reading cannot flip the verdict.
+    Refuse once the disagreement has exceeded the limit on `k` consecutive readings; allow again only after
+    it has been below `release` x limit on `k` consecutive readings. Pure and deterministic: feed it gaps."""
+
+    def __init__(self, limit_m, k=3, release=0.8):
+        self.limit, self.k, self.release = limit_m, k, release
+        self.over = self.under = 0
+        self.latched = False
+
+    def update(self, gap_m):
+        self.over = self.over + 1 if gap_m > self.limit else 0
+        self.under = self.under + 1 if gap_m < self.release * self.limit else 0
+        if not self.latched and self.over >= self.k:
+            self.latched = True
+        elif self.latched and self.under >= self.k:
+            self.latched = False
+        return "FAIL" if self.latched else "PASS"
+
+
 def vehicle_check(req, snap):
     """PASS only if every rule for the action's class holds. Movement (takeoff, goto): fence, ceiling,
     navigation, battery. rtl: navigation only. land and every other action: no vehicle-state rule

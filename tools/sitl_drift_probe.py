@@ -29,7 +29,7 @@ def report(tag):
           f"true-vs-believed {d(t.lat,t.lng,g.lat,g.lon):.1f} m, ekf {e.flags}", flush=True)
 mode = sys.argv[1]
 pump(2)
-if mode == "ramp-check":
+if mode in ("ramp-check", "ramp-check-v13"):
     import importlib.util, os, random
     spec = importlib.util.spec_from_file_location("va", os.path.join(os.path.dirname(os.path.abspath(__file__)), "vehicle_action.py"))
     va = importlib.util.module_from_spec(spec); spec.loader.exec_module(va)
@@ -38,6 +38,7 @@ if mode == "ramp-check":
            "params": {"alt_m": 20.0, "lat_e7": FLAT, "lon_e7": FLON},
            "limits": {"min_fix_type": 3, "min_sats": 6, "min_battery_pct": 30, "max_nav_disagreement_m": 25.0}}
     rng, first = random.SystemRandom(), None
+    latch, verdicts, latched_v = va.DisagreementLatch(25.0), [], []
     for i in range(0, 101):
         if i:
             m.mav.param_set_send(m.target_system, m.target_component, b"SIM_GPS1_GLTCH_X", i*0.00001, mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
@@ -48,12 +49,21 @@ if mode == "ramp-check":
                 "battery_pct": ss.battery_remaining, "lat_e7": g.lat, "lon_e7": g.lon, "rel_alt_mm": g.relative_alt,
                 "armed": True, "mode": "GUIDED", "xpos_lat_e7": xl, "xpos_lon_e7": xo}
         chk = va.vehicle_check(req, snap)
+        gap = va.distance_m(g.lat, g.lon, xl, xo)
+        verdicts.append(chk["verdict"]); latched_v.append(latch.update(gap))
+        if mode == "ramp-check-v13" and i % 5 == 0:
+            print(f"step {i:3d}: gap {gap:6.1f} m  single-reading {chk['verdict']}  latched {latched_v[-1]}", flush=True)
         if chk["verdict"] == "FAIL" and first is None:
             first = i
             print(f"first FAIL at step {i} (offset {i*0.00001:.5f} deg): {chk['why']}", flush=True)
         if i % 10 == 0:
             print(f"step {i:3d}: {chk['verdict']}  {chk['why'][:90]}", flush=True)
     print("first failing step:", first)
+    if mode == "ramp-check-v13":
+        flips = lambda v: (sum(1 for a, b in zip(v, v[1:]) if a == "PASS" and b == "FAIL"),  # noqa: E731
+                           sum(1 for a, b in zip(v, v[1:]) if a == "FAIL" and b == "PASS"))
+        print(f"single-reading rule: PASS->FAIL {flips(verdicts)[0]}, FAIL->PASS {flips(verdicts)[1]}")
+        print(f"V13 latch (3 over / 3 under 80%): PASS->FAIL {flips(latched_v)[0]}, FAIL->PASS {flips(latched_v)[1]}")
     report("after ramp")
 elif mode == "ramp":
     report("start")

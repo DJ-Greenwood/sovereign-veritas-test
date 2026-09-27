@@ -156,7 +156,7 @@ MEASUREMENT_KEYS = {
     "vehicle_command_check": {"artifact_sha256", "backend", "check", "commands_sent", "kind", "outcome",
                               "output_sha256", "telemetry_after", "telemetry_before", "thermal_before", "vehicle"},
 }
-MODEL_PARAMS = frozenset({"temperature", "seed", "max_tokens", "cache_prompt", "scripted"})
+MODEL_PARAMS = frozenset({"temperature", "seed", "max_tokens", "cache_prompt", "scripted", "server_devices"})
 
 
 def unknown_nested_keys(pkg):
