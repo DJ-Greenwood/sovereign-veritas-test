@@ -133,3 +133,22 @@ A10        1  rolled-back log: second-latest package ACCEPTED under D2
 - **P11 held, which means the gap is real.** Anyone who can rewrite the witness log can make an older
   package look like the newest. Branch protection on GitHub is what stands against this today. P12
   (anchoring the log's head outside the author's control) is the fix, still unbuilt.
+
+## Round 3: a consumer that remembers (registered 2026-09-27, before the code)
+
+A7 (replay) and A10 (rollback) pass D2 because the verifier has no memory. `tools/consumer.py` adds
+the consumer's side, which is G1-3 in `docs/SV_GATE_1_SCOPE.md` plus P12. It keeps a small state file:
+
+- `consumed`: the package digests it has acted on. A repeat is refused.
+- `anchor`: the longest witness log it has seen, as (number of entries, sha256 of those lines). A
+  log that does not begin with exactly those lines is refused as a rollback or rewrite. It must be
+  the same length or longer.
+
+**D3** = D2 + the consumer check. Flag: `--round3`.
+
+- **P13** A7: the latest package is accepted the first time and refused the second (D3: 1 then 0).
+- **P14** A10: a consumer that has already seen the full log refuses the rolled-back one, 0 of 1. A
+  consumer with no state (first use) still accepts it, 1 of 1. That is the stated limit: memory only
+  protects someone who has been there before.
+- **P15 (anti-vacuity)** A fresh consumer accepts the genuine latest package, and a log that grew
+  by one entry after the anchor is accepted (extension, not rollback).
