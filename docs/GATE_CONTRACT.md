@@ -297,3 +297,8 @@ the same session, while building the attack harness, the author had read `replay
 C6 does show: the traps the contract names all come out right in a language where each one differs
 by default. That includes Python truthiness, Python equality, big integers, `repr` of a double, and
 round-half-even at four places. The CI job `port-go` now reruns the check on every push.
+
+**Correction (same day).** The sentence above, "the CI job `port-go` now reruns the check on every
+push", was written before that job had run. It then failed on its first six runs (`47bd4de` to
+`b84486b`): `go build ./ports/go` needs a Go module at the repository root, and there is none. Fixed in
+`41cf2fc` by building inside `ports/go`. `port-go` has passed since.
