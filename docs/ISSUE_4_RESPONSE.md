@@ -3,6 +3,10 @@
 Status: **Registered** (2026-09-26). Results are appended under the registration and never edited
 into it. The issue: https://github.com/holland202/sovereign-veritas/issues/4
 
+Reviewer: Nick Kouns (@nicholaskouns-create). GitHub marks the issue and his three follow-up comments
+"with Grok (by xAI)"; credited here as Nick Kouns with Grok. Every break was checked against this
+repository's own code before it was accepted, so the findings stand on the code, not on who wrote them.
+
 The review's scope note is accepted as written: sv.gate/0 is a good decision procedure over
 records, and the break is treating it as a verifier of reality and a gate on action. This file
 records, break by break, what is accepted, what is fixed now, what waits for sv.gate/1, and the
