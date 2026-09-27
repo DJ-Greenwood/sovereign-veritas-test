@@ -373,3 +373,13 @@ Closing state on the S25 (2026-09-26 evening): `llama-cpp-backend-vulkan` uninst
 (`Removing llama-cpp-backend-vulkan (0.5.0) ...`), so a plain llama-server run no longer reaches the
 corrupting Vulkan path. llama.cpp stays at 0.5.0 with the OpenCL backend; Qualcomm's OpenCL is used
 only with `LD_LIBRARY_PATH=$HOME/.adreno-cl`.
+
+### Qualcomm OpenCL made permanent: `tools/adreno_opencl_setup.sh`
+
+Repeats the working recipe above as one script: copies the vendor OpenCL loader (from
+`opencl-vendor-driver`) and the Adreno driver with its runtime libraries into `~/.adreno-cl`,
+removes Android's `libc++.so`, `libbase.so` and `libcutils.so` if present, installs
+`llama-server-adreno` (= `llama-server --device GPUOpenCL -ngl 99` with the library path set), and
+exits 0 only if llama-server lists `GPUOpenCL`. Re-run after a system update. Checked here only for
+syntax and for refusing cleanly off the phone (`COULD NOT RUN`, exit 2); the phone run is recorded
+below when it happens.
