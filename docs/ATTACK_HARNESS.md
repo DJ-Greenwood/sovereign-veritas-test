@@ -115,3 +115,21 @@ Three more classes. The same harness, with the flag `--round2`.
 
 **Unrun, left open (P12).** Anchoring the log's head digest somewhere the author does not control (a
 second repository, or a public timestamp) makes A10 detectable. That is not built.
+
+### Round 2 results (container x86_64, 2026-09-27)
+
+`python tools/attack_harness.py --round2`. Output: `results/attack_harness/output_round2.txt`.
+
+```
+A8        84  D1 accepted 0/84, crashed 0
+A9         5  no_header UNREADABLE, seq_gap UNREADABLE, repeated_digest UNREADABLE, not_hex UNREADABLE, header_only NOT_WITNESSED
+A10        1  rolled-back log: second-latest package ACCEPTED under D2
+```
+
+- **P9 held.** No malformed signature was accepted, and none crashed the check. That includes a real
+  author signature made for another purpose (namespace `file`).
+- **P10 held.** Every corrupted log fails closed, as unreadable rather than as a verdict. A log with
+  a header and no entries gives NOT_WITNESSED.
+- **P11 held, which means the gap is real.** Anyone who can rewrite the witness log can make an older
+  package look like the newest. Branch protection on GitHub is what stands against this today. P12
+  (anchoring the log's head outside the author's control) is the fix, still unbuilt.

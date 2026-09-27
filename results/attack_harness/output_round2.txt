@@ -1,0 +1,24 @@
+corpus 21 packages, latest runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json
+class      n      D0     D1     D2   checks that refused under D0
+GENUINE   21   21/21  21/21   1/21   -
+A1        21    0/21   0/21   0/21   decision_record_matches, execution_only_if_allowed, gate_replay, package_digest, vehicle_check_bound
+A2        21    0/21   0/21   0/21   execution_only_if_allowed, gate_replay, vehicle_check_bound
+A3         9    9/9    0/9    0/9    -
+A4         9    9/9    0/9    0/9    -
+A5         4    4/4    0/4    0/4    -
+A6        20   20/20  20/20   0/20   -
+A7         1    1/1    1/1    1/1    -
+A8        84  D1 accepted 0/84, crashed 0
+A9         5  no_header UNREADABLE, seq_gap UNREADABLE, repeated_digest UNREADABLE, not_hex UNREADABLE, header_only NOT_WITNESSED
+A10        1  rolled-back log: second-latest package ACCEPTED under D2
+P0  HELD
+P1  HELD
+P2  HELD
+P3  HELD
+P4  HELD
+P5  HELD
+P6  HELD
+P7  HELD
+P9  HELD
+P10  HELD
+P11  HELD

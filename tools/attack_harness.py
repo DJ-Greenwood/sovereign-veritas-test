@@ -7,7 +7,8 @@ forgery is resealed with the verifier's OWN functions (vehicle_check, replay_gat
 is the attacker's best move. Keys are throwaway, made in a temporary directory; the phone's
 ~/.ssh/sv_package_ed25519 is never touched.
 
-  python tools/attack_harness.py [--runs DIR ...] [--json OUT]
+  python tools/attack_harness.py [--runs DIR ...] [--json OUT] [--round2]
+  --round2 adds A8-A10 (malformed signatures, corrupted witness logs, rollback) and P9-P11.
 Exit: 0 every registered prediction held | 1 one failed | 2 could not run
 """
 import argparse, base64, copy, glob, importlib.util, json, os, shutil, subprocess, sys, tempfile
@@ -42,12 +43,12 @@ class Keys:
             fh.write(f"author {pub[0]} {pub[1]}\n")
         self.n = 0
 
-    def sign(self, who, data):
+    def sign(self, who, data, namespace=None):
         self.n += 1
         path = os.path.join(self.tmp, f"blob{self.n}")
         with open(path, "wb") as fh:
             fh.write(data)
-        subprocess.run([self.exe, "-Y", "sign", "-q", "-f", os.path.join(self.tmp, who), "-n", self.vp.NAMESPACE, path],
+        subprocess.run([self.exe, "-Y", "sign", "-q", "-f", os.path.join(self.tmp, who), "-n", namespace or self.vp.NAMESPACE, path],
                        check=True, capture_output=True)
         return path + ".sig"
 
@@ -108,10 +109,65 @@ def dump(pkg):
     return (json.dumps(pkg, indent=2, sort_keys=True) + "\n").encode()
 
 
+def round2(vp, keys, corpus, genuine_sig, witness, tmp, summary):
+    """A8-A10 (docs/ATTACK_HARNESS.md, round 2). Returns [(pid, held)] and prints a table."""
+    import random
+    rng = random.Random(2026)
+    a8 = {"accepted": 0, "n": 0, "crashed": 0}
+    for _, name, data, _ in corpus:
+        g = open(genuine_sig[name], "rb").read()
+        variants = {"empty": b"", "random": bytes(rng.getrandbits(8) for _ in range(64)), "truncated": g[: len(g) // 2]}
+        paths = {}
+        for k, blob in variants.items():
+            paths[k] = os.path.join(tmp, f"bad_{k}_{os.path.basename(name)}.sig")
+            with open(paths[k], "wb") as fh:
+                fh.write(blob)
+        paths["wrong_namespace"] = keys.sign("author", data, namespace="file")
+        for k, pth in paths.items():
+            a8["n"] += 1
+            try:
+                a8["accepted"] += bool(keys.valid(data, pth))
+            except Exception:  # noqa: BLE001 - counted: P9 requires none
+                a8["crashed"] += 1
+    latest_pkg = corpus[-1][3]
+    lines = open(witness).read().splitlines()
+    header, entries = lines[0], lines[1:]
+    bad_logs = {
+        "no_header": entries,
+        "seq_gap": [header] + entries[:1] + [e.replace(e.split()[0], str(int(e.split()[0]) + 1), 1) for e in entries[1:]],
+        "repeated_digest": [header] + entries + [f"{len(entries) + 1} {entries[0].split()[1]}"],
+        "not_hex": [header] + entries[:-1] + [f"{len(entries)} {entries[-1].split()[1].upper()}"],
+        "header_only": [header],
+    }
+    a9 = {}
+    for k, ls in bad_logs.items():
+        pth = os.path.join(tmp, f"witness_{k}.log")
+        with open(pth, "w") as fh:
+            fh.write("\n".join(ls) + "\n")
+        try:
+            ok, status, _ = vp.check_witness(latest_pkg, pth)
+            a9[k] = ("ACCEPTED" if ok else status)
+        except vp.WitnessUnreadable:
+            a9[k] = "UNREADABLE"
+    rolled = os.path.join(tmp, "witness_rolled.log")
+    with open(rolled, "w") as fh:
+        fh.write("\n".join([header] + entries[:-1]) + "\n")
+    _, name2, data2, pkg2 = corpus[-2]
+    d1 = all(ok for _, ok, _ in vp.verify(pkg2)) and keys.valid(data2, genuine_sig[name2])
+    a10 = d1 and vp.check_witness(pkg2, rolled)[0]
+    print(f"A8       {a8['n']:>3}  D1 accepted {a8['accepted']}/{a8['n']}, crashed {a8['crashed']}")
+    print("A9         5  " + ", ".join(f"{k} {v}" for k, v in a9.items()))
+    print(f"A10        1  rolled-back log: second-latest package {'ACCEPTED' if a10 else 'refused'} under D2")
+    summary["A8"], summary["A9"], summary["A10"] = a8, a9, {"accepted": bool(a10)}
+    p10 = all(v == "UNREADABLE" for k, v in a9.items() if k != "header_only") and a9["header_only"] == "NOT_WITNESSED"
+    return [("P9", a8["accepted"] == 0 and a8["crashed"] == 0), ("P10", p10), ("P11", bool(a10))]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="*", default=DEFAULT_RUNS)
     ap.add_argument("--json")
+    ap.add_argument("--round2", action="store_true")
     a = ap.parse_args()
     try:
         vp = load_verifier()
@@ -220,11 +276,13 @@ def main():
         ("P6", s["A6"]["D0"] == s["A6"]["n"] and s["A6"]["D1"] == s["A6"]["n"] and s["A6"]["D2"] == 0),
         ("P7", s["A7"]["D0"] == s["A7"]["D1"] == s["A7"]["D2"] == 1),
     ]
-    for pid, ok in preds:
-        print(f"{pid}  {'HELD' if ok else 'FAILED'}")
+    if a.round2:
+        preds += round2(vp, keys, corpus, genuine_sig, witness, tmp, summary)
     if a.json:
         with open(a.json, "w") as fh:
             json.dump({"summary": summary, "rows": results, "predictions": dict(preds)}, fh, indent=1, sort_keys=True)
+    for pid, ok in preds:
+        print(f"{pid}  {'HELD' if ok else 'FAILED'}")
     shutil.rmtree(tmp, ignore_errors=True)
     sys.exit(0 if all(ok for _, ok in preds) else 1)
 
