@@ -383,3 +383,21 @@ removes Android's `libc++.so`, `libbase.so` and `libcutils.so` if present, insta
 exits 0 only if llama-server lists `GPUOpenCL`. Re-run after a system update. Checked here only for
 syntax and for refusing cleanly off the phone (`COULD NOT RUN`, exit 2); the phone run is recorded
 below when it happens.
+
+On the S25, the script and then one easy and one hard question through `llama-server-adreno`:
+
+```
+copied into /data/data/com.termux/files/home/.adreno-cl: libCB.so libOpenCL.so libOpenCL_adreno.so libadreno_app_profiles.so libadreno_compiler_cl.so libadreno_utils.so libgsl.so libllvm-qcom.so libq3dtools_adreno.so
+installed /data/data/com.termux/files/usr/bin/llama-server-adreno
+OK:   GPUOpenCL: QUALCOMM Adreno(TM) 830 (5556 MiB, 4532 MiB free)
+reply   '{"answer": 184, "action": "write_note", "note": "23 times 8 equals 184."}'
+check   PASS (answer correct)  asked for 'write_note'
+decision ALLOW []
+reply   '{\n  "answer": 37683922,\n  "action": "write_note",\n  "note": "The product of 7338 and 5099 is 37683922."\n}'
+check   FAIL (answer 37683922 is not 37416462)  asked for 'write_note'
+decision REFUSE ['verification_not_passed']
+```
+
+The script works on the phone. The GPU's wrong answer to the hard question, 37683922, is the same
+as in the earlier OpenCL run, so the OpenCL path is repeatable across a fresh server start and a
+fresh copy of the driver.
