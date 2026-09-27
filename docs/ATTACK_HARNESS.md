@@ -94,3 +94,24 @@ noted, not built.
 
 **Limit.** 21 packages from one simulator and one attacker model (no key, no witness write access).
 A stolen author key defeats D1 and D2 completely; that is the key-custody problem, out of scope.
+
+## Round 2: malformed signatures and witness logs (registered 2026-09-27, before the code)
+
+Three more classes. The same harness, with the flag `--round2`.
+
+| id | attack | applied to |
+|---|---|---|
+| A8 | a malformed signature attached to a genuine package: an empty file, 64 random bytes, the genuine signature cut in half, and a valid author signature under the wrong namespace (`file`) | 21 packages × 4 |
+| A9 | a corrupted witness log, presented with the latest package: no header, a gap in `seq`, a repeated digest, a digest that is not lowercase hex, a header and nothing else | 5 logs |
+| A10 | rollback: the attacker controls the log and deletes its last line, presented with the second-latest package (this runs P8 from round 1) | 1 |
+
+- **P9** A8: D1 accepts 0 of 84, and no attempt ends in an unhandled exception.
+- **P10** A9: every corrupted log is refused as unreadable (`WitnessUnreadable`, which the CLI reports
+  as COULD NOT LOOK, exit 2). None is read as a verdict, so D2 accepts 0 of 5. The empty log is the
+  exception: it is well-formed with no entries, so it gives `NOT_WITNESSED`, which is also a refusal.
+- **P11 (the gap, stated in advance)** A10: D2 accepts the rolled-back package, 1 of 1. The witness is
+  only as good as the log's integrity. On GitHub that means a protected branch, which the harness
+  cannot test.
+
+**Unrun, left open (P12).** Anchoring the log's head digest somewhere the author does not control (a
+second repository, or a public timestamp) makes A10 detectable. That is not built.
