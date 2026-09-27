@@ -56,8 +56,8 @@ unprotected branch) defeats D2 for A6. Not tested here: it needs a second git re
 
 ## Results (container x86_64, Python 3.11.15, 2026-09-27)
 
-`python tools/attack_harness.py --json runs/attack_harness/result.json`, 2.7 s. Output in
-`runs/attack_harness/output.txt`:
+`python tools/attack_harness.py --json results/attack_harness/result.json`, 2.7 s. Output in
+`results/attack_harness/output.txt`:
 
 ```
 corpus 21 packages, latest runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json
