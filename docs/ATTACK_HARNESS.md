@@ -53,3 +53,44 @@ own key; an attempt counts as accepted if either passes.
 
 **Unrun, left open (P8).** An attacker who can also write the witness log (a force-push to an
 unprotected branch) defeats D2 for A6. Not tested here: it needs a second git remote.
+
+## Results (container x86_64, Python 3.11.15, 2026-09-27)
+
+`python tools/attack_harness.py --json runs/attack_harness/result.json`, 2.7 s. Output in
+`runs/attack_harness/output.txt`:
+
+```
+corpus 21 packages, latest runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json
+class      n      D0     D1     D2   checks that refused under D0
+GENUINE   21   21/21  21/21   1/21   -
+A1        21    0/21   0/21   0/21   decision_record_matches, execution_only_if_allowed, gate_replay, package_digest, vehicle_check_bound
+A2        21    0/21   0/21   0/21   execution_only_if_allowed, gate_replay, vehicle_check_bound
+A3         9    9/9    0/9    0/9    -
+A4         9    9/9    0/9    0/9    -
+A5         4    4/4    0/4    0/4    -
+A6        20   20/20  20/20   0/20   -
+A7         1    1/1    1/1    1/1    -
+```
+
+P0-P7 all held. What that means, class by class:
+
+- **The consistency checks alone (D0) stop decision tampering and nothing else.** A flipped decision
+  is refused 21/21 with or without a reseal. But every observation rewrite (A3 9/9, A4 9/9) and every
+  request swap (A5 4/4) is accepted by D0: a resealed package is internally consistent by
+  construction. D0's job is to show the decision follows from the recorded evidence, not that the
+  evidence is real.
+- **The signature (D1) is what stops forgery:** 0 of 34 forged packages accepted, with either the
+  source's genuine signature or the attacker's own key attached.
+- **The witness (D2) is what stops staleness:** 20/20 older genuine packages pass D1 and 0/20 pass
+  D2.
+- **Replay of the latest is not stopped by anything here (A7, 1/1 under D2),** as registered. A
+  consumer must refuse a package digest it has already acted on.
+
+**Found while running, not registered:** the A5 forgeries keep `commands_sent` as recorded
+(`SET_POSITION_TARGET_GLOBAL_INT` with the *old* target), and D0 does not compare the sent command
+with the request's parameters. Binding them would not change D0's A5 result against this attacker,
+who can rewrite `commands_sent` in the same reseal. It would catch a careless forgery only, so it is
+noted, not built.
+
+**Limit.** 21 packages from one simulator and one attacker model (no key, no witness write access).
+A stolen author key defeats D1 and D2 completely; that is the key-custody problem, out of scope.
