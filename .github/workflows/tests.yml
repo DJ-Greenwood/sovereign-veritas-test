@@ -48,7 +48,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24"
-      - run: go build -o svgate ./ports/go
+      - run: go build -o ../../svgate .
+        working-directory: ports/go  # the Go module lives there, not at the repository root
       - run: python tools/gate_contract.py --check-command ./svgate
 
   red-team:

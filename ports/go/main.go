@@ -4,7 +4,7 @@
 // It reads one case per line on stdin, {"id", "input"}, and writes one line per case,
 // {"id", "decision", "reasons"}. Check it with:
 //
-//	python tools/gate_contract.py --check-command go run ./ports/go
+//	(cd ports/go && go build -o ../../svgate .) && python tools/gate_contract.py --check-command ./svgate
 package main
 
 import (

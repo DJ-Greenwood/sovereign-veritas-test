@@ -261,7 +261,7 @@ open item is an implementation by someone else.
 
 **What.** `ports/go/gate.go` is a Go implementation of `sv.gate/0`, standard library only, written
 from `CONTRACT.md` alone. It does not read the Python source. It is checked with
-`python tools/gate_contract.py --check-command go run ./ports/go`.
+`(cd ports/go && go build -o ../../svgate .) && python tools/gate_contract.py --check-command ./svgate`.
 
 **What it can show.** Whether the contract as written is enough to port the Gate into a language whose
 JSON, number formatting and equality differ from Python's. Those are the porting traps CONTRACT.md
