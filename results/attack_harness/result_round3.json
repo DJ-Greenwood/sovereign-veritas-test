@@ -1,0 +1,1020 @@
+{
+ "predictions": {
+  "P0": true,
+  "P1": true,
+  "P10": true,
+  "P11": true,
+  "P13": true,
+  "P14": true,
+  "P15": true,
+  "P2": true,
+  "P3": true,
+  "P4": true,
+  "P5": true,
+  "P6": true,
+  "P7": true,
+  "P9": true
+ },
+ "rows": {
+  "A1": [
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_98b78fd97e64.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_80855d390a48.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_fd0198365f0b.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_aa2fd72afe52.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_31c566b45699.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_c212b1be77bb.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_01e41ea9d04d.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_1cb1bc93e3fe.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_1506bcc87b3f.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_e2742efd6cd8.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_e7b6562cec75.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "package_digest",
+     "decision_record_matches",
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json"
+   }
+  ],
+  "A2": [
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_98b78fd97e64.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_80855d390a48.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_fd0198365f0b.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl/sv_package_aa2fd72afe52.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_31c566b45699.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_c212b1be77bb.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_01e41ea9d04d.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_1cb1bc93e3fe.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_1506bcc87b3f.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_e2742efd6cd8.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v12/sv_package_e7b6562cec75.json"
+   },
+   {
+    "D0": false,
+    "D1": false,
+    "D2": false,
+    "failed": [
+     "gate_replay",
+     "vehicle_check_bound",
+     "execution_only_if_allowed"
+    ],
+    "package": "runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json"
+   }
+  ],
+  "A3": [
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   }
+  ],
+  "A4": [
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   }
+  ],
+  "A5": [
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_80855d390a48.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_01e41ea9d04d.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_1506bcc87b3f.json"
+   },
+   {
+    "D0": true,
+    "D1": false,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_e2742efd6cd8.json"
+   }
+  ],
+  "A6": [
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_98b78fd97e64.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_80855d390a48.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_fd0198365f0b.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_aa2fd72afe52.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_31c566b45699.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_c212b1be77bb.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_01e41ea9d04d.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_1cb1bc93e3fe.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_1506bcc87b3f.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_e2742efd6cd8.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_e7b6562cec75.json"
+   }
+  ],
+  "A7": [
+   {
+    "D0": true,
+    "D1": true,
+    "D2": true,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json"
+   }
+  ],
+  "GENUINE": [
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_eef440c1a19d.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_8416b7537ad7.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_98b78fd97e64.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_80855d390a48.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_48a574f7a293.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_38697f863557.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_fd0198365f0b.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_d048e1f2d4b2.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_a684ca47cdbb.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl/sv_package_aa2fd72afe52.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_31c566b45699.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try1_battery/sv_package_a3db3dd426a2.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_c212b1be77bb.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v11/try2/sv_package_01e41ea9d04d.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_1cb1bc93e3fe.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_1506bcc87b3f.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_63be8f24ae27.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_17fc46618269.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_e2742efd6cd8.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": false,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v12/sv_package_e7b6562cec75.json"
+   },
+   {
+    "D0": true,
+    "D1": true,
+    "D2": true,
+    "failed": [],
+    "package": "runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json"
+   }
+  ]
+ },
+ "summary": {
+  "A1": {
+   "D0": 0,
+   "D1": 0,
+   "D2": 0,
+   "n": 21
+  },
+  "A10": {
+   "accepted": true
+  },
+  "A2": {
+   "D0": 0,
+   "D1": 0,
+   "D2": 0,
+   "n": 21
+  },
+  "A3": {
+   "D0": 9,
+   "D1": 0,
+   "D2": 0,
+   "n": 9
+  },
+  "A4": {
+   "D0": 9,
+   "D1": 0,
+   "D2": 0,
+   "n": 9
+  },
+  "A5": {
+   "D0": 4,
+   "D1": 0,
+   "D2": 0,
+   "n": 4
+  },
+  "A6": {
+   "D0": 20,
+   "D1": 20,
+   "D2": 0,
+   "n": 20
+  },
+  "A7": {
+   "D0": 1,
+   "D1": 1,
+   "D2": 1,
+   "n": 1
+  },
+  "A8": {
+   "accepted": 0,
+   "crashed": 0,
+   "n": 84
+  },
+  "A9": {
+   "header_only": "NOT_WITNESSED",
+   "no_header": "UNREADABLE",
+   "not_hex": "UNREADABLE",
+   "repeated_digest": "UNREADABLE",
+   "seq_gap": "UNREADABLE"
+  },
+  "GENUINE": {
+   "D0": 21,
+   "D1": 21,
+   "D2": 1,
+   "n": 21
+  },
+  "round3": {
+   "extension": true,
+   "first": true,
+   "replay": false,
+   "rollback_fresh": true,
+   "rollback_seen": false
+  }
+ }
+}

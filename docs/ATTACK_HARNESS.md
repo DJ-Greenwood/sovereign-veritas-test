@@ -152,3 +152,20 @@ the consumer's side, which is G1-3 in `docs/SV_GATE_1_SCOPE.md` plus P12. It kee
   protects someone who has been there before.
 - **P15 (anti-vacuity)** A fresh consumer accepts the genuine latest package, and a log that grew
   by one entry after the anchor is accepted (extension, not rollback).
+
+### Round 3 results (container x86_64, 2026-09-27)
+
+`python tools/attack_harness.py --round2 --round3`. Output: `results/attack_harness/output_round3.txt`.
+
+```
+A7/D3      2  first use ACCEPTED, replay refused
+A10/D3     2  consumer that saw the full log: refused; first use: ACCEPTED
+EXT/D3     1  log grew by one entry after the anchor, new latest package: ACCEPTED
+```
+
+- **P13, P14 and P15 held.** A consumer that remembers closes replay (A7), and closes rollback for
+  anyone who has seen the newer log (A10).
+- **Still open:** a first-time consumer can be rolled back, because nothing it holds says otherwise.
+  An anchor published outside the author's control (P12) would cover that case too.
+- `tests/test_consumer.py` checks the command line: accept once, refuse the replay, refuse a
+  rollback without touching the state file, and report an unreadable log as COULD NOT LOOK.

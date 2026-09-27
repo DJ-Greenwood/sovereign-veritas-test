@@ -163,11 +163,52 @@ def round2(vp, keys, corpus, genuine_sig, witness, tmp, summary):
     return [("P9", a8["accepted"] == 0 and a8["crashed"] == 0), ("P10", p10), ("P11", bool(a10))]
 
 
+def round3(vp, keys, corpus, genuine_sig, witness, tmp, summary):
+    """P13-P15: D3 = D2 + tools/consumer.py (consumed digests, monotonic witness anchor)."""
+    spec = importlib.util.spec_from_file_location("consumer_h", os.path.join(ROOT, "tools", "consumer.py"))
+    cons = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cons)
+    lines = open(witness).read().splitlines()
+    header, entries = lines[0], lines[1:]
+
+    def write_log(name, ls):
+        pth = os.path.join(tmp, name)
+        with open(pth, "w") as fh:
+            fh.write("\n".join([header] + ls) + "\n")
+        return pth
+
+    def d3(item, log, state):
+        _, name, data, pkg = item
+        d2 = (all(ok for _, ok, _ in vp.verify(pkg)) and keys.valid(data, genuine_sig[name])
+              and vp.check_witness(pkg, log)[0])
+        if not d2:
+            return False, state
+        ok, _, new = cons.consumer_check(vp, pkg, log, state)
+        return ok, (new if ok else state)
+
+    full = write_log("w_full.log", entries)
+    rolled = write_log("w_rolled.log", entries[:-1])
+    fresh = {"consumed": [], "anchor": None}
+    ok1, st = d3(corpus[-1], full, fresh)
+    ok2, st = d3(corpus[-1], full, st)                       # A7 again
+    seen_full = st
+    rb_seen, _ = d3(corpus[-2], rolled, seen_full)           # A10 against a consumer that saw the full log
+    rb_fresh, _ = d3(corpus[-2], rolled, fresh)              # A10 on first use
+    ok_prev, st20 = d3(corpus[-2], rolled, fresh)            # a consumer that saw only 20 entries...
+    ext, _ = d3(corpus[-1], full, st20)                      # ...then the log grew by one: extension
+    print(f"A7/D3      2  first use {'ACCEPTED' if ok1 else 'refused'}, replay {'ACCEPTED' if ok2 else 'refused'}")
+    print(f"A10/D3     2  consumer that saw the full log: {'ACCEPTED' if rb_seen else 'refused'}; first use: {'ACCEPTED' if rb_fresh else 'refused'}")
+    print(f"EXT/D3     1  log grew by one entry after the anchor, new latest package: {'ACCEPTED' if ext else 'refused'}")
+    summary["round3"] = dict(first=ok1, replay=ok2, rollback_seen=rb_seen, rollback_fresh=rb_fresh, extension=ext)
+    return [("P13", ok1 and not ok2), ("P14", (not rb_seen) and rb_fresh), ("P15", ok1 and ok_prev and ext)]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="*", default=DEFAULT_RUNS)
     ap.add_argument("--json")
     ap.add_argument("--round2", action="store_true")
+    ap.add_argument("--round3", action="store_true")
     a = ap.parse_args()
     try:
         vp = load_verifier()
@@ -278,6 +319,8 @@ def main():
     ]
     if a.round2:
         preds += round2(vp, keys, corpus, genuine_sig, witness, tmp, summary)
+    if a.round3:
+        preds += round3(vp, keys, corpus, genuine_sig, witness, tmp, summary)
     if a.json:
         with open(a.json, "w") as fh:
             json.dump({"summary": summary, "rows": results, "predictions": dict(preds)}, fh, indent=1, sort_keys=True)
