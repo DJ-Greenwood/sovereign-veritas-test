@@ -1,0 +1,37 @@
+step   0: gap    0.9 m  single-reading PASS  latched PASS
+step   0: PASS  all goto rules hold
+step   5: gap    9.2 m  single-reading PASS  latched PASS
+step  10: gap    8.3 m  single-reading PASS  latched PASS
+step  10: PASS  all goto rules hold
+step  15: gap   15.5 m  single-reading PASS  latched PASS
+step  20: gap   24.3 m  single-reading PASS  latched PASS
+step  20: PASS  all goto rules hold
+first FAIL at step 22 (offset 0.00022 deg): autopilot and independent position disagree by 27.3 m > 25.0 m
+step  25: gap   24.8 m  single-reading PASS  latched FAIL
+step  30: gap   32.1 m  single-reading FAIL  latched FAIL
+step  30: FAIL  autopilot and independent position disagree by 32.1 m > 25.0 m
+step  35: gap   40.3 m  single-reading FAIL  latched FAIL
+step  40: gap   42.4 m  single-reading FAIL  latched FAIL
+step  40: FAIL  autopilot and independent position disagree by 42.4 m > 25.0 m
+step  45: gap   49.3 m  single-reading FAIL  latched FAIL
+step  50: gap   53.2 m  single-reading FAIL  latched FAIL
+step  50: FAIL  autopilot and independent position disagree by 53.2 m > 25.0 m
+step  55: gap   61.8 m  single-reading FAIL  latched FAIL
+step  60: gap   70.4 m  single-reading FAIL  latched FAIL
+step  60: FAIL  autopilot and independent position disagree by 70.4 m > 25.0 m
+step  65: gap   78.5 m  single-reading FAIL  latched FAIL
+step  70: gap   79.2 m  single-reading FAIL  latched FAIL
+step  70: FAIL  autopilot and independent position disagree by 79.2 m > 25.0 m
+step  75: gap   86.9 m  single-reading FAIL  latched FAIL
+step  80: gap   91.0 m  single-reading FAIL  latched FAIL
+step  80: FAIL  autopilot and independent position disagree by 91.0 m > 25.0 m
+step  85: gap   94.5 m  single-reading FAIL  latched FAIL
+step  90: gap   93.3 m  single-reading FAIL  latched FAIL
+step  90: FAIL  autopilot and independent position disagree by 93.3 m > 25.0 m
+step  95: gap  107.4 m  single-reading FAIL  latched FAIL
+step 100: gap  110.3 m  single-reading FAIL  latched FAIL
+step 100: FAIL  autopilot and independent position disagree by 110.3 m > 25.0 m
+first failing step: 22
+single-reading rule: PASS->FAIL 3, FAIL->PASS 2
+V13 latch (3 over / 3 under 80%): PASS->FAIL 1, FAIL->PASS 0
+after ramp: true 111.2 m from fence centre, believed 0.0 m, true-vs-believed 111.2 m, ekf 831

@@ -392,6 +392,32 @@ can re-check it. What it does not show: that any real sensor is that source (the
 truth plus noise; a real one has its own errors and may itself be spoofable), or anything about a
 spoofer who drifts the independent source too.
 
-**V13 (registered, not run):** requiring the disagreement to exceed the limit on 3 consecutive
+**V13 (registered before its run; result below):** requiring the disagreement to exceed the limit on 3 consecutive
 readings before refusing (and to fall below 80 % of it on 3 before allowing again) removes the
 flapping: over the same ramp, one transition from PASS to FAIL and none back.
+
+## V13 results (ArduCopter SITL, container, 2026-09-27)
+
+Fresh SITL, `BATT_CAPACITY` 30000, `takeoff` to 20 m with `--max-disagreement 25 --xpos-sigma 3`
+(package `runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json`, `VERDICT CONSISTENT`). Then
+`python tools/sitl_drift_probe.py ramp-check-v13`: the V11 ramp, running the single-reading check and
+the V13 latch (`DisagreementLatch(25.0)`: 3 readings over the limit to latch, 3 under 20.0 m to
+release) side by side on the same readings. Full output in `runs/vehicle_sitl_v13/ramp_check_v13.txt`.
+
+```
+step  20: gap   24.3 m  single-reading PASS  latched PASS
+first FAIL at step 22 (offset 0.00022 deg): autopilot and independent position disagree by 27.3 m > 25.0 m
+step  25: gap   24.8 m  single-reading PASS  latched FAIL
+step  30: gap   32.1 m  single-reading FAIL  latched FAIL
+first failing step: 22
+single-reading rule: PASS->FAIL 3, FAIL->PASS 2
+V13 latch (3 over / 3 under 80%): PASS->FAIL 1, FAIL->PASS 0
+```
+
+- **V13 confirmed.** Over the ramp the latch made one transition from PASS to FAIL and none back.
+  On the same readings the single-reading rule flapped: 3 transitions to FAIL, 2 back to PASS
+  (step 25 read 24.8 m, just under the limit, and passed).
+- **Cost, stated:** the latch refuses no earlier than the third reading over the limit, so it adds
+  up to two readings of delay (here, one per second) against the single-reading rule.
+- **Limit:** one run, one ramp rate, one noise level. It shows the latch removes flapping at this
+  threshold. It does not show the right `k` or release fraction for a real sensor.
