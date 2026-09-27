@@ -58,3 +58,19 @@ records that as a second package chained to the first.
 `cached_origin`). A compromised companion could lie about it. Only a signature by the companion's
 key, not its log line, would bind the label to the companion. The gate judges the route an answer
 took, not the answer.
+
+## Results (x86_64, Python 3.11.15, 2026-09-27)
+
+- **CA1-CA5 held** (`tests/test_companion_action.py`, 7 tests). A tool answer is ALLOWed and released.
+  UNCERTAIN and ESCALATE are DEFERred. CACHED is ALLOWed only with origin `deterministic`; `large_model`
+  and a missing origin DEFER. An unknown status and an unparseable line are REFUSEd. A status relabelled
+  to SUPPORTED fails `artifact_digest` without a reseal, and `measurement_recomputed` with one.
+- **CA6 held.** `python tools/verifier_mutants.py --only companion_check_bound`: KILLED by
+  `test_bound_action_value_must_be_the_record_answer`. The null mutant passed.
+- **CA7 held, 3 of 3** (veritas-companion `experiments/C005_gate_bridge/`, `4f…` onward):
+  - 640 delegation records became 640 packages, all CONSISTENT.
+  - 480 answers were ALLOWed, 0 of them wrong.
+  - Every UNCERTAIN (60), ESCALATE (20) and cached large-model answer (80) was DEFERred.
+
+As registered, a known limit remains: the check trusts the companion's own labels, so it judges the
+route an answer took, not the answer.

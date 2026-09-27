@@ -153,6 +153,7 @@ MEASUREMENT_KEYS = {
     "model_answer_check": {"artifact_sha256", "backend", "check", "elapsed_ms", "kind", "model_file", "model_id",
                            "note_sha256", "output_sha256", "params", "preload_seconds", "raw_output",
                            "thermal_before"},
+    "companion_route_check": {"artifact_sha256", "check", "kind", "output_sha256", "released_sha256"},
     "vehicle_command_check": {"artifact_sha256", "backend", "check", "commands_sent", "kind", "outcome",
                               "output_sha256", "telemetry_after", "telemetry_before", "thermal_before", "vehicle"},
 }
@@ -473,6 +474,50 @@ def recompute_model_answer(m, artifact):
     return m.get("output_sha256")
 
 
+# ---- a veritas-companion answer, re-checked (tools/companion_action.py; docs/COMPANION_ACTION.md) ---------
+COMPANION_SCHEMA = "sv.companion_record/0"
+
+
+def companion_check(rec):
+    """The check, re-implemented: PASS only for an answer a deterministic tool produced (directly, or
+    replayed from the cache with that origin); INSUFFICIENT_EVIDENCE for conflicts, escalations and
+    anything the large model answered; FAIL for a record this check cannot read."""
+    if not isinstance(rec, dict) or not all(isinstance(rec.get(k), str) for k in ("status", "delegated_to", "final_result")):
+        return {"verdict": "FAIL", "why": "record lacks a string status, delegated_to or final_result"}
+    st, to = rec["status"], rec["delegated_to"]
+    if st == "SUPPORTED":
+        if to == "deterministic":
+            return {"verdict": "PASS", "why": "answered by a deterministic tool"}
+        return {"verdict": "INSUFFICIENT_EVIDENCE", "why": f"SUPPORTED but delegated to {to!r}"}
+    if st == "CACHED":
+        origin = rec.get("cached_origin")
+        if origin == "deterministic":
+            return {"verdict": "PASS", "why": "cached answer of a deterministic tool"}
+        return {"verdict": "INSUFFICIENT_EVIDENCE", "why": f"cached answer from {origin or 'an unrecorded tier'}"}
+    if st == "UNCERTAIN":
+        return {"verdict": "INSUFFICIENT_EVIDENCE", "why": "the tools found conflicting values"}
+    if st == "ESCALATE":
+        return {"verdict": "INSUFFICIENT_EVIDENCE", "why": f"outside the tools; answered by {to}"}
+    return {"verdict": "FAIL", "why": f"unknown status {st!r}"}
+
+
+def recompute_companion(m, artifact):
+    """The recorded output_sha256 if the record and the check recompute; else why not."""
+    try:
+        doc = json.loads(artifact.decode("utf-8"))
+        ok = doc["schema"] == COMPANION_SCHEMA and isinstance(doc["record"], dict)
+    except (ValueError, KeyError, TypeError):
+        ok = False
+    if not ok:
+        return "the artifact is not a companion record"
+    out = sha(canon(doc["record"]))
+    if out != m.get("output_sha256"):
+        return "the record does not hash to output_sha256"
+    if companion_check(doc["record"]) != m.get("check"):
+        return "the recorded check does not recompute"
+    return out
+
+
 # ---- a vehicle command, re-checked (tools/vehicle_action.py; docs/VEHICLE_ACTION.md) -----------------
 VEHICLE_SCHEMA = "sv.vehicle_request/0"
 VEHICLE_MOVEMENT = ("takeoff", "goto")
@@ -568,6 +613,8 @@ def recompute_measurement(m, artifact):
         return recompute_model_answer(m, artifact)
     if m.get("kind") == "vehicle_command_check":
         return recompute_vehicle(m, artifact)
+    if m.get("kind") == "companion_route_check":
+        return recompute_companion(m, artifact)
     return None
 
 
@@ -606,6 +653,7 @@ def verify(pkg, allow_recorded_only=False):
         check("measurement_recomputed", out == m.get("output_sha256"),
               "reply re-parsed, answer re-checked" if m.get("kind") == "model_answer_check" and out == m.get("output_sha256")
               else "snapshot re-hashed, vehicle check re-run" if m.get("kind") == "vehicle_command_check" and out == m.get("output_sha256")
+              else "record re-hashed, route check re-run" if m.get("kind") == "companion_route_check" and out == m.get("output_sha256")
               else ("recomputed from artifact bytes" if out == m.get("output_sha256") else str(out)[:80]))
 
     chain = pkg["provenance"]["chain"]
@@ -712,6 +760,26 @@ def verify(pkg, allow_recorded_only=False):
             broken.append("note hash does not match what ran")
         check("model_check_bound", not broken, "; ".join(broken) or
               f"verdict {chk.get('verdict')}, asked for {act.get('requested')!r}, note {'written' if ran else 'not written'}")
+
+    if m.get("kind") == "companion_route_check":
+        try:
+            crec = json.loads(artifact.decode("utf-8")).get("record")
+        except (ValueError, AttributeError):
+            crec = None
+        crec = crec if isinstance(crec, dict) else {}
+        chk = m.get("check") if isinstance(m.get("check"), dict) else {}
+        act = rec.get("action") or {}
+        ran = (rec.get("metadata") or {}).get("execution_status") == "SUCCEEDED"
+        value = crec.get("final_result")
+        broken = []
+        if (rec.get("verification") or {}).get("status") != chk.get("verdict"):
+            broken.append("recorded verification is not the check's verdict")
+        if act.get("requested") != "use_answer" or (act.get("parameters") or {}) != {"value": value}:
+            broken.append("the action is not use_answer with the record's final_result")
+        if m.get("released_sha256") != (sha(value) if ran and isinstance(value, str) else None):
+            broken.append("released hash does not match what ran")
+        check("companion_check_bound", not broken, "; ".join(broken) or
+              f"verdict {chk.get('verdict')}, answer {'released' if ran else 'not released'}")
 
     if m.get("kind") == "vehicle_command_check":
         try:
