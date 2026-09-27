@@ -67,7 +67,7 @@ took, not the answer.
   to SUPPORTED fails `artifact_digest` without a reseal, and `measurement_recomputed` with one.
 - **CA6 held.** `python tools/verifier_mutants.py --only companion_check_bound`: KILLED by
   `test_bound_action_value_must_be_the_record_answer`. The null mutant passed.
-- **CA7 held, 3 of 3** (veritas-companion `experiments/C005_gate_bridge/`, `4f…` onward):
+- **CA7 held, 3 of 3** (veritas-companion `experiments/C005_gate_bridge/`, commit `f6f29d1`):
   - 640 delegation records became 640 packages, all CONSISTENT.
   - 480 answers were ALLOWed, 0 of them wrong.
   - Every UNCERTAIN (60), ESCALATE (20) and cached large-model answer (80) was DEFERred.
