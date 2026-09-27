@@ -24,7 +24,8 @@ KNOWN_LIMITS = """Known limits - a forgery using ONLY these does not count:
 K1 consistent rewrite: change declared inputs (runtime, policy, capability) AND the decision to
    what the Gate would decide from them.
 K2 recorded-only values: elapsed_ms, artifact name, earlier chain records, a thermal zone's raw
-   value together with a matching summary.
+   value together with a matching summary, and the descriptive labels measurement.backend and
+   measurement.vehicle (added 2026-09-27 after the S25 run found them unbound, round 4).
 K3 recorded observation: for a model_answer_check or vehicle_command_check package, rewrite the
    recorded observation itself (the model's raw reply, or the vehicle's telemetry snapshot) with
    its hash, its check and everything downstream. Only a signature binds the observation.
@@ -32,6 +33,7 @@ K3 recorded observation: for a model_answer_check or vehicle_command_check packa
 KNOWN_PATHS = (("decision",), ("resource_state", "runtime"), ("gate_inputs",),
                ("measurement", "elapsed_ms"),
                ("artifact", "name"), ("resource_state", "thermal"),
+               ("measurement", "backend"), ("measurement", "vehicle"),  # K2 labels (2026-09-27)
                ("measurement", "raw_output"), ("measurement", "telemetry_before"),  # K3
                ("measurement", "output_sha256"), ("measurement", "check"))
 

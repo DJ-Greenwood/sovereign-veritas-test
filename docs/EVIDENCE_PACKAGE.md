@@ -927,3 +927,33 @@ exit=0
   step read `zones 0` on all three, `thermal unknown`, REFUSE, `CONSISTENT`.
 
 Still open: witnessing the pair, after the outside reproduction of `sv_package_5bfc70dfcfa2` is back.
+
+## Red team on the S25, 2026-09-27: nemotron-3-super-120b against the V13 package (EXPLORATORY)
+
+`python tools/nvidia_challenge.py --package runs/vehicle_sitl_v13/sv_package_a911244dfcf7.json --rounds 5`
+(the tool picked `nvidia/nemotron-3-super-120b-a12b`). Log on the phone: `~/sv_challenge_1790537111.json`.
+
+```
+round 1: ACCEPTED - within known limits K1-K3  paths [['provenance', 'chain', -1, 'record', 'metadata']]
+round 2: ACCEPTED - within known limits K1-K3  paths [['artifact', 'name']]
+round 3: REJECTED by schema_closed, vehicle_check_bound  (2 edits, 23.8s)
+round 4: ACCEPTED - OUTSIDE KNOWN LIMITS - review by hand  paths [['measurement', 'backend']]
+round 5: UNUSABLE reply (ValueError: no list of {path, value} edits in reply)
+VERDICT 1 forgery(ies) outside the known limits accepted - review the log by hand
+```
+
+**Round 4, reviewed by hand.** Reproduced in the container: `measurement.backend` changed from
+`mavlink` to `sitl-mock`, and `measurement.vehicle` to a different aircraft's name, verify CONSISTENT
+after a reseal. Neither field is checked: they are descriptive labels. The finding is real in one sense
+and not in another.
+
+- **Not a break of the challenge.** It needs a reseal, so it is a rewrite without a signature, which
+  CHALLENGE.md lists as known. With the signature on, the field sweep above already showed every
+  single-field rewrite is refused (0 verified).
+- **A real gap in the tool's list.** `nvidia_challenge.py`'s K2 list did not name these two labels, so
+  the tool could not classify the rewrite. They are added to K2 (2026-09-27), and the tool now
+  classifies this edit as known.
+- **What it teaches.** An unsigned package's labels ("which backend", "which vehicle") are claims, not
+  measurements. Only the signature binds them to the author. Binding the vehicle's identity to
+  something measured would need the autopilot's own identity (for example a signed boot ID), which
+  ArduPilot SITL does not provide.
