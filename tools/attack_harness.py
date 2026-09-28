@@ -231,7 +231,7 @@ def main():
 
     # The author signs and witnesses every genuine package, oldest first.
     witness = os.path.join(tmp, "packages.log")
-    with open(witness, "w") as fh:
+    with open(witness, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(vp.WITNESS_HEADER + "\n")
         for i, (_, _, _, pkg) in enumerate(corpus, 1):
             fh.write(f"{i} {pkg['package_sha256']}\n")
