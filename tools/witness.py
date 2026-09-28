@@ -70,14 +70,14 @@ def main():
             print(f"COULD NOT RUN: witness log unusable: {exc}"); sys.exit(2)
     else:
         os.makedirs(os.path.dirname(os.path.abspath(log)), exist_ok=True)
-        with open(log, "w", encoding="utf-8") as fh:
+        with open(log, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(vp.WITNESS_HEADER + "\n")
         entries = []
     digest = pkg["package_sha256"]
     if any(d == digest for _, d in entries):
         print(f"REFUSED: {digest} is already witnessed"); sys.exit(1)
     seq = len(entries) + 1
-    with open(log, "a", encoding="utf-8") as fh:
+    with open(log, "a", encoding="utf-8", newline="\n") as fh:
         fh.write(f"{seq} {digest}\n")
         fh.flush()
         os.fsync(fh.fileno())
