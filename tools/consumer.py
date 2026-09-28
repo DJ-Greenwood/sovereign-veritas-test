@@ -44,10 +44,8 @@ def load_state(path):
     return st
 
 
-def consumer_check(vp, pkg, witness_log, state):
-    """(ok, why, new_state). Pure: the caller decides whether to save new_state. Raises
-    vp.WitnessUnreadable for an unusable log."""
-    entries = vp.read_witness_log(witness_log)
+def consumer_check(vp, pkg, entries, state):
+    """(ok, why, new_state) using one already-read witness snapshot."""
     anchor = state.get("anchor")
     if anchor is not None:
         n = anchor["entries"]
@@ -79,10 +77,11 @@ def main():
         checks = vp.verify(pkg)
         if a.signature:
             checks.append(("signature", *vp.check_signature(data, a.signature, a.allowed_signers, a.identity)))
-        ok_w, fresh, detail = vp.check_witness(pkg, a.witness_log)
+        entries = vp.read_witness_log(a.witness_log)
+        ok_w, fresh, detail = vp.check_witness_entries(pkg, entries)
         checks.append(("freshness_witness", ok_w, f"{fresh}: {detail}"))
         state = load_state(a.state)
-        ok_c, why, new = consumer_check(vp, pkg, a.witness_log, state)
+        ok_c, why, new = consumer_check(vp, pkg, entries, state)
         checks.append(("consumer", ok_c, why))
     except (vp.WitnessUnreadable, vp.SignatureUnavailable, OSError, ValueError, KeyError) as exc:
         print(f"COULD NOT LOOK: {type(exc).__name__}: {exc}")

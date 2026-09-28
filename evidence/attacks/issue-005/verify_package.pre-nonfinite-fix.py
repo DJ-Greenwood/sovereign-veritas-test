@@ -21,7 +21,6 @@ packages the author never logged. The VERDICT line reports each layer separately
 SIGNED whenever the signature check passed, even if another check failed.
 """
 import base64, hashlib, json, math, os, shutil, subprocess, sys, tempfile
-from pathlib import Path
 
 NAMESPACE = "sv-package"
 
@@ -38,83 +37,44 @@ class WitnessUnreadable(Exception):
 
 
 def read_witness_log(path):
-    """Read only the canonical witness-log byte representation."""
+    """[(seq, sha256)] with seq 1..n strictly increasing and unique 64-hex digests."""
     try:
-        data = Path(path).read_bytes()
+        with open(path, encoding="utf-8") as fh:
+            lines = [l.rstrip("\n") for l in fh]
     except OSError as exc:
         raise WitnessUnreadable(str(exc))
-
-    try:
-        text = data.decode("utf-8")
-    except UnicodeDecodeError as exc:
-        raise WitnessUnreadable(f"witness log is not valid UTF-8: {exc}")
-
-    header = WITNESS_HEADER + "\n"
-    if not text.startswith(header):
+    if not lines or lines[0] != WITNESS_HEADER:
         raise WitnessUnreadable(f"first line must be {WITNESS_HEADER!r}")
-
     entries, seen = [], set()
-    lines = text.splitlines(keepends=True)
-
-    if not lines or lines[0] != header:
-        raise WitnessUnreadable("witness header must end with LF")
-
     for n, line in enumerate(lines[1:], start=2):
-        if not line.endswith("\n"):
-            raise WitnessUnreadable(f"line {n}: must end with LF")
-        if "\r" in line:
-            raise WitnessUnreadable(f"line {n}: carriage return is not canonical")
-        if line == "\n":
-            raise WitnessUnreadable(f"line {n}: blank entries are not canonical")
-
-        body = line[:-1]
-        parts = body.split(" ")
-
-        if len(parts) != 2 or not parts[0].isdigit() or parts[0] == "0":
-            raise WitnessUnreadable(f"line {n}: expected canonical '<seq> <sha256>'")
-
-        seq_text, digest = parts
-
-        if seq_text != str(len(entries) + 1):
-            raise WitnessUnreadable(
-                f"line {n}: seq {seq_text}, expected {len(entries) + 1}"
-            )
-
+        if not line.strip():
+            continue
+        parts = line.split()
+        if len(parts) != 2 or not parts[0].isdigit():
+            raise WitnessUnreadable(f"line {n}: expected '<seq> <sha256>'")
+        seq, digest = int(parts[0]), parts[1]
+        if seq != len(entries) + 1:
+            raise WitnessUnreadable(f"line {n}: seq {seq}, expected {len(entries) + 1}")
         if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
             raise WitnessUnreadable(f"line {n}: not a lowercase sha256")
-
         if digest in seen:
             raise WitnessUnreadable(f"line {n}: digest already logged")
-
         seen.add(digest)
-        entries.append((int(seq_text), digest))
-
+        entries.append((seq, digest))
     return entries
-
-
-def check_witness_entries(pkg, entries):
-    """(ok, status, detail) using an already-read witness snapshot."""
-    digest = pkg.get("package_sha256")
-    seqs = [s for s, d in entries if d == digest]
-
-    if not seqs:
-        return False, "NOT_WITNESSED", f"not among {len(entries)} witnessed packages"
-
-    later = len(entries) - seqs[0]
-    if later:
-        return False, "STALE", (
-            f"entry {seqs[0]} of {len(entries)}: "
-            f"{later} newer package(s) witnessed"
-        )
-
-    return True, f"LATEST_WITNESSED({seqs[0]})", (
-        f"entry {seqs[0]} of {len(entries)}, the last"
-    )
 
 
 def check_witness(pkg, log_path):
     """(ok, status, detail). ok only when the package is the last witnessed entry."""
-    return check_witness_entries(pkg, read_witness_log(log_path))
+    entries = read_witness_log(log_path)
+    digest = pkg.get("package_sha256")
+    seqs = [s for s, d in entries if d == digest]
+    if not seqs:
+        return False, "NOT_WITNESSED", f"not among {len(entries)} witnessed packages"
+    later = len(entries) - seqs[0]
+    if later:
+        return False, "STALE", f"entry {seqs[0]} of {len(entries)}: {later} newer package(s) witnessed"
+    return True, f"LATEST_WITNESSED({seqs[0]})", f"entry {seqs[0]} of {len(entries)}, the last"
 
 
 def check_signature(data, sig_path, allowed_signers, identity):
@@ -565,21 +525,10 @@ EKF_POS_HORIZ_ABS, EKF_GPS_GLITCH, EKF_UNINITIALIZED = 16, 32768, 1024
 
 
 def distance_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7):
-    if not all(is_finite_number(v) for v in (lat1_e7, lon1_e7, lat2_e7, lon2_e7)):
-        return float("nan")
     p1, p2 = math.radians(lat1_e7 / 1e7), math.radians(lat2_e7 / 1e7)
     dp, dl = p2 - p1, math.radians((lon2_e7 - lon1_e7) / 1e7)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * 6371000.0 * math.asin(math.sqrt(a))
-
-
-def is_finite_number(value):
-    """True only for numeric values with a finite IEEE-754 representation."""
-    return (
-        not isinstance(value, bool)
-        and isinstance(value, (int, float))
-        and math.isfinite(value)
-    )
 
 
 def vehicle_check(req, snap):
@@ -589,17 +538,10 @@ def vehicle_check(req, snap):
     failures = []
 
     def nav():
-        gps_fix = snap["gps_fix_type"]
-        if not is_finite_number(gps_fix):
-            failures.append(f"gps fix {gps_fix!r} is non-finite or non-numeric")
-        elif gps_fix < lim["min_fix_type"]:
-            failures.append(f"gps fix {gps_fix} < {lim['min_fix_type']}")
-
-        gps_sats = snap["gps_sats"]
-        if not is_finite_number(gps_sats):
-            failures.append(f"satellites {gps_sats!r} is non-finite or non-numeric")
-        elif gps_sats < lim["min_sats"]:
-            failures.append(f"satellites {gps_sats} < {lim['min_sats']}")
+        if snap["gps_fix_type"] < lim["min_fix_type"]:
+            failures.append(f"gps fix {snap['gps_fix_type']} < {lim['min_fix_type']}")
+        if snap["gps_sats"] < lim["min_sats"]:
+            failures.append(f"satellites {snap['gps_sats']} < {lim['min_sats']}")
         flags = snap["ekf_flags"]
         if flags & EKF_UNINITIALIZED or not flags & EKF_POS_HORIZ_ABS:
             failures.append(f"ekf has no absolute horizontal position (flags {flags})")
@@ -610,36 +552,27 @@ def vehicle_check(req, snap):
                 failures.append("no independent position to cross-check")
             else:
                 gap = distance_m(snap["lat_e7"], snap["lon_e7"], snap["xpos_lat_e7"], snap["xpos_lon_e7"])
-                if not math.isfinite(gap):
-                    failures.append(f"navigation disagreement is non-finite ({gap!r})")
-                elif gap > lim["max_nav_disagreement_m"]:
+                if gap > lim["max_nav_disagreement_m"]:
                     failures.append(f"autopilot and independent position disagree by {gap:.1f} m "
                                     f"> {lim['max_nav_disagreement_m']} m")
 
     if action in VEHICLE_MOVEMENT:
         alt = p.get("alt_m")
-        if not is_finite_number(alt) or not 2 <= alt <= fence["max_alt_m"]:
+        if isinstance(alt, bool) or not isinstance(alt, (int, float)) or not 2 <= alt <= fence["max_alt_m"]:
             failures.append(f"altitude {alt!r} not within 2..{fence['max_alt_m']} m")
-
         here = distance_m(fence["lat_e7"], fence["lon_e7"], snap["lat_e7"], snap["lon_e7"])
-        if not math.isfinite(here):
-            failures.append(f"vehicle distance is non-finite ({here!r})")
-        elif here > fence["radius_m"]:
+        if here > fence["radius_m"]:
             failures.append(f"vehicle {here:.1f} m from fence centre > {fence['radius_m']} m")
         if action == "goto":
             if not all(isinstance(p.get(k), int) and not isinstance(p.get(k), bool) for k in ("lat_e7", "lon_e7")):
                 failures.append("goto target is not two integers (degrees * 1e7)")
             else:
                 there = distance_m(fence["lat_e7"], fence["lon_e7"], p["lat_e7"], p["lon_e7"])
-                if not math.isfinite(there):
-                    failures.append(f"target distance is non-finite ({there!r})")
-                elif there > fence["radius_m"]:
+                if there > fence["radius_m"]:
                     failures.append(f"target {there:.1f} m from fence centre > {fence['radius_m']} m")
         nav()
         batt = snap["battery_pct"]
-        if not is_finite_number(batt):
-            failures.append(f"battery {batt!r} is non-finite or non-numeric")
-        elif batt < 0:
+        if batt < 0:
             failures.append("battery remaining unknown")
         elif batt < lim["min_battery_pct"]:
             failures.append(f"battery {batt} % < {lim['min_battery_pct']} %")

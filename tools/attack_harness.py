@@ -183,7 +183,8 @@ def round3(vp, keys, corpus, genuine_sig, witness, tmp, summary):
               and vp.check_witness(pkg, log)[0])
         if not d2:
             return False, state
-        ok, _, new = cons.consumer_check(vp, pkg, log, state)
+        entries = vp.read_witness_log(log)
+        ok, _, new = cons.consumer_check(vp, pkg, entries, state)
         return ok, (new if ok else state)
 
     full = write_log("w_full.log", entries)

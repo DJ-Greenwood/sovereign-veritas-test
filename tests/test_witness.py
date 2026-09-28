@@ -153,3 +153,17 @@ def test_w7_invalid_signature_is_still_not_proven(two):
                      "--witness-log", log)
     assert rc == 1 and "FAIL  signature" in out and "authenticity=NOT_PROVEN" in out
 
+
+
+@pytest.mark.parametrize("bad_entry", [
+    "0001 " + "a" * 64 + "\n",
+    "1\t" + "a" * 64 + "\n",
+    "1  " + "a" * 64 + "\n",
+    "1 " + "a" * 64 + " \n",
+    "\n",
+])
+def test_w8_noncanonical_witness_entry_is_rejected(two, bad_entry):
+    _, a, _, log = two
+    log.write_text("# sv witness log v0\n" + bad_entry)
+    rc, out = verify(a, "--witness-log", log)
+    assert rc == 2 and "COULD NOT LOOK" in out

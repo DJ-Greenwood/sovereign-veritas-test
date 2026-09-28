@@ -55,8 +55,6 @@ def could_not_run(msg):
 # ---- the check (tools/verify_package.py re-implements it) -------------------------------------------
 def distance_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7):
     """Great-circle distance in metres between two points given in degrees * 1e7."""
-    if not all(is_finite_number(v) for v in (lat1_e7, lon1_e7, lat2_e7, lon2_e7)):
-        return float("nan")
     p1, p2 = math.radians(lat1_e7 / 1e7), math.radians(lat2_e7 / 1e7)
     dp, dl = p2 - p1, math.radians((lon2_e7 - lon1_e7) / 1e7)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
@@ -83,15 +81,6 @@ class DisagreementLatch:
         return "FAIL" if self.latched else "PASS"
 
 
-def is_finite_number(value):
-    """True only for numeric values with a finite IEEE-754 representation."""
-    return (
-        not isinstance(value, bool)
-        and isinstance(value, (int, float))
-        and math.isfinite(value)
-    )
-
-
 def vehicle_check(req, snap):
     """PASS only if every rule for the action's class holds. Movement (takeoff, goto): fence, ceiling,
     navigation, battery. rtl: navigation only. land and every other action: no vehicle-state rule
@@ -100,17 +89,10 @@ def vehicle_check(req, snap):
     failures = []
 
     def nav():
-        gps_fix = snap["gps_fix_type"]
-        if not is_finite_number(gps_fix):
-            failures.append(f"gps fix {gps_fix!r} is non-finite or non-numeric")
-        elif gps_fix < lim["min_fix_type"]:
-            failures.append(f"gps fix {gps_fix} < {lim['min_fix_type']}")
-
-        gps_sats = snap["gps_sats"]
-        if not is_finite_number(gps_sats):
-            failures.append(f"satellites {gps_sats!r} is non-finite or non-numeric")
-        elif gps_sats < lim["min_sats"]:
-            failures.append(f"satellites {gps_sats} < {lim['min_sats']}")
+        if snap["gps_fix_type"] < lim["min_fix_type"]:
+            failures.append(f"gps fix {snap['gps_fix_type']} < {lim['min_fix_type']}")
+        if snap["gps_sats"] < lim["min_sats"]:
+            failures.append(f"satellites {snap['gps_sats']} < {lim['min_sats']}")
         flags = snap["ekf_flags"]
         if flags & EKF_UNINITIALIZED or not flags & EKF_POS_HORIZ_ABS:
             failures.append(f"ekf has no absolute horizontal position (flags {flags})")
@@ -121,36 +103,27 @@ def vehicle_check(req, snap):
                 failures.append("no independent position to cross-check")
             else:
                 gap = distance_m(snap["lat_e7"], snap["lon_e7"], snap["xpos_lat_e7"], snap["xpos_lon_e7"])
-                if not math.isfinite(gap):
-                    failures.append(f"navigation disagreement is non-finite ({gap!r})")
-                elif gap > lim["max_nav_disagreement_m"]:
+                if gap > lim["max_nav_disagreement_m"]:
                     failures.append(f"autopilot and independent position disagree by {gap:.1f} m "
                                     f"> {lim['max_nav_disagreement_m']} m")
 
     if action in MOVEMENT:
         alt = p.get("alt_m")
-        if not is_finite_number(alt) or not 2 <= alt <= fence["max_alt_m"]:
+        if isinstance(alt, bool) or not isinstance(alt, (int, float)) or not 2 <= alt <= fence["max_alt_m"]:
             failures.append(f"altitude {alt!r} not within 2..{fence['max_alt_m']} m")
-
         here = distance_m(fence["lat_e7"], fence["lon_e7"], snap["lat_e7"], snap["lon_e7"])
-        if not math.isfinite(here):
-            failures.append(f"vehicle distance is non-finite ({here!r})")
-        elif here > fence["radius_m"]:
+        if here > fence["radius_m"]:
             failures.append(f"vehicle {here:.1f} m from fence centre > {fence['radius_m']} m")
         if action == "goto":
             if not all(isinstance(p.get(k), int) and not isinstance(p.get(k), bool) for k in ("lat_e7", "lon_e7")):
                 failures.append("goto target is not two integers (degrees * 1e7)")
             else:
                 there = distance_m(fence["lat_e7"], fence["lon_e7"], p["lat_e7"], p["lon_e7"])
-                if not math.isfinite(there):
-                    failures.append(f"target distance is non-finite ({there!r})")
-                elif there > fence["radius_m"]:
+                if there > fence["radius_m"]:
                     failures.append(f"target {there:.1f} m from fence centre > {fence['radius_m']} m")
         nav()
         batt = snap["battery_pct"]
-        if not is_finite_number(batt):
-            failures.append(f"battery {batt!r} is non-finite or non-numeric")
-        elif batt < 0:
+        if batt < 0:
             failures.append("battery remaining unknown")
         elif batt < lim["min_battery_pct"]:
             failures.append(f"battery {batt} % < {lim['min_battery_pct']} %")

@@ -91,57 +91,6 @@ def test_fence_edge_and_unknown_battery():
     assert "battery remaining unknown" in va.vehicle_check(req("takeoff", alt_m=10), dict(GOOD, battery_pct=-1))["why"]
 
 
-def test_nonfinite_safety_inputs_fail_closed():
-    cases = [
-        (dict(GOOD, battery_pct=float("nan")), "battery"),
-        (dict(GOOD, battery_pct=float("inf")), "battery"),
-        (dict(GOOD, battery_pct=float("-inf")), "battery"),
-        (dict(GOOD, gps_fix_type=float("nan")), "gps fix"),
-        (dict(GOOD, gps_fix_type=float("inf")), "gps fix"),
-        (dict(GOOD, gps_sats=float("nan")), "satellites"),
-        (dict(GOOD, gps_sats=float("inf")), "satellites"),
-    ]
-
-    for snap, expected in cases:
-        result = va.vehicle_check(req("takeoff", alt_m=10), snap)
-        assert result["verdict"] == "FAIL"
-        assert expected in result["why"]
-        assert "non-finite" in result["why"]
-
-
-def test_nonfinite_altitude_fails_closed():
-    for alt in (float("nan"), float("inf"), float("-inf")):
-        result = va.vehicle_check(req("takeoff", alt_m=alt), GOOD)
-        assert result["verdict"] == "FAIL"
-        assert "altitude" in result["why"]
-
-
-def test_nonfinite_distance_fails_closed():
-    for value in (float("nan"), float("inf"), float("-inf")):
-        snap = dict(GOOD, lat_e7=value)
-        result = va.vehicle_check(req("takeoff", alt_m=10), snap)
-        assert result["verdict"] == "FAIL"
-        assert "distance is non-finite" in result["why"]
-
-
-def test_nonfinite_verifier_matches_producer():
-    cases = [
-        dict(GOOD, battery_pct=float("nan")),
-        dict(GOOD, battery_pct=float("inf")),
-        dict(GOOD, battery_pct=float("-inf")),
-        dict(GOOD, gps_fix_type=float("nan")),
-        dict(GOOD, gps_fix_type=float("inf")),
-        dict(GOOD, gps_sats=float("nan")),
-        dict(GOOD, gps_sats=float("inf")),
-        dict(GOOD, lat_e7=float("nan")),
-        dict(GOOD, lat_e7=float("inf")),
-    ]
-
-    for snap in cases:
-        r = req("takeoff", alt_m=10)
-        assert va.vehicle_check(r, snap) == vp.vehicle_check(r, snap), snap
-
-
 def test_the_verifier_reimplementation_agrees_with_the_tool():
     snaps = [GOOD, dict(GOOD, gps_fix_type=2), dict(GOOD, battery_pct=10), dict(GOOD, ekf_flags=167),
              dict(GOOD, lat_e7=GOOD["lat_e7"] + 40000)]

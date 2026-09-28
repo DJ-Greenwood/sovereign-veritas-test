@@ -1,0 +1,22 @@
+PASS  schema                             sv.package/0
+PASS  schema_closed                      no unknown keys
+PASS  package_digest                     
+PASS  artifact_digest                    
+PASS  measurement_names_artifact         
+PASS  measurement_recomputed             snapshot re-hashed, vehicle check re-run
+PASS  provenance_chain                   
+PASS  decision_record_is_artifact        
+PASS  decision_record_matches            
+PASS  measurement_in_chain               
+PASS  capability_named_in_record         
+PASS  gate_replay                        replayed ALLOW []
+PASS  verifier_identity_not_overclaimed  
+PASS  verifier_provenance                vehicle-command-check-v0 VALIDATED
+PASS  thermal                            zone statuses and per-domain summary recomputed
+PASS  thermal_before                     0 zones: domain and status recomputed
+PASS  evidence_states                    thermal_status=OPERATOR compute_budget=DEFAULTED power_status=DEFAULTED
+PASS  vehicle_check_bound                verdict PASS, 'takeoff', 3 command(s) sent
+PASS  execution_only_if_allowed          SUCCEEDED under ALLOW
+PASS  freshness_not_overclaimed          NOT_PROVEN
+PASS  limitations_declared               the four statements, resource state from its evidence states
+VERDICT  CONSISTENT  freshness=NOT_PROVEN  authenticity=NOT_PROVEN
