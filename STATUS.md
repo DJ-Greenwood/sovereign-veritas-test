@@ -2,7 +2,27 @@
 
 ---
 
+## CREDITED breaks
+
+- **Nicholas Kouns** (@nicholaskouns-create) — [issue #5](https://github.com/holland202/sovereign-veritas/issues/5)
+  (2026-09-28): two unpublished implementation defects at `8f098e8`.
+  (1) `vehicle_check` fail-opened on NaN / Infinity (IEEE comparisons never fired; Gate
+  replayed ALLOW; verifier CONSISTENT). (2) `consumer.py` accepted a non-canonical witness
+  prefix (`0001\t…` after anchoring `1 …`) because the anchor hashed the *parsed* pairs, not
+  the exact entry-line bytes. Fixed in `2902a2c`. Evidence under `evidence/attacks/issue-005/`;
+  registration and results in [docs/ISSUE_5_RESPONSE.md](docs/ISSUE_5_RESPONSE.md).
+  Public reconstruction of the break and the revision: https://spring-palm-cedar-willow.grok.me/
+  ("Threefold"). Signature against the published key still refused the poisoned file.
+- **Nicholas Kouns** (@nicholaskouns-create) — [issue #4](https://github.com/holland202/sovereign-veritas/issues/4)
+  (2026-09-26): eleven accepted breaks of treating sv.gate/0 as a verifier of reality and a gate
+  on action. B4 and B11 fixed; the rest assigned to sv.gate/1. See [docs/ISSUE_4_RESPONSE.md](docs/ISSUE_4_RESPONSE.md).
+
+---
+
 ## VERIFIED — automated tests
+
+**Latest (2026-09-28): Issue #5 closed** (commit `2902a2c`). Non-finite telemetry and
+non-canonical witness prefixes are refused. Registration: [docs/ISSUE_5_RESPONSE.md](docs/ISSUE_5_RESPONSE.md).
 
 **Latest (2026-09-26 evening): 364 passed** (container); verifier mutants 26 of 26 killed; vacuity_lint
 0 findings; the Gate's conformance digest unchanged (`44823d0f…0628`). What the day added, each with
@@ -23,6 +43,8 @@ its registration and results in the named doc:
   (V12c refuted; V13 registered). Simulation only; not for GNSS-contested use.
 - Issue #4 (docs/ISSUE_4_RESPONSE.md): all eleven breaks accepted; B4 and B11 fixed; the rest
   assigned to sv.gate/1.
+- Issue #5 (docs/ISSUE_5_RESPONSE.md): two implementation defects accepted and fixed (non-finite
+  checker, non-canonical witness anchor). Credit: Nicholas Kouns.
 
 Open: V13; sv.gate/1 and sv.package/1 (issue #4); B6b and a second-author implementation; G1 (record
 the server's devices in model packages).
