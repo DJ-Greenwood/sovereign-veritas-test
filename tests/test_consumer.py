@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-"""tools/consumer.py: first-use then refuse replay (G1-3)."""
 import json, os, subprocess, sys
 from pathlib import Path
 
