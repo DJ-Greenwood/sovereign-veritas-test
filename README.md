@@ -270,6 +270,14 @@ registry mutation
 
 If custody fails, the registry does not change.
 
+## Operational Telemetry (Baseline Sensor)
+
+To establish a measurable baseline of automated repository scraping, this repository includes a neutral network access sensor. This is strictly operational telemetry used to isolate background ecosystem noise; it is **not** an epistemic component of the Sovereign Veritas architecture.
+
+Automated bots, mirrors, and CI scanners will naturally parse the URI below. Human auditors are advised to ignore it.
+
+[sv_automated_traffic_baseline](http://canarytokens.com/tags/h6463dr12x771dmhcihj1lr6p/contact.php)
+
 ## License and credit
 
 MIT. You may use, change, share and sell this, including commercially, on one condition: keep the
