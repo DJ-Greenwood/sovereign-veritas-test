@@ -95,4 +95,3 @@ substantial portion. That is the credit the license requires.
 If you use Sovereign Veritas in work you publish — a paper, a product, a post — please also cite
 it. GitHub's **Cite this repository** button gives the format (from `CITATION.cff`).
 
-<img src="http://canarytokens.com/tags/h6463dr12x771dmhcihj1lr6p/contact.php" width="1" height="1" alt="">
