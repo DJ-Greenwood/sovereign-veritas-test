@@ -463,7 +463,20 @@ def evidence_statement(states):
 
 
 # ---- verifier validation rule, re-implemented ------------------------------------------------
+def count(x):
+    """A probe count: a plain int >= 0. bool, float, NaN and infinities are not counts."""
+    return type(x) is int and x >= 0
+
+
 def validation_status(v):
+    # Found 2026-09-30 by a differential probe (tools/nonfinite_probe.py): failed_probes = NaN or -Infinity
+    # made "failed_probes > 0" false and the package verified CONSISTENT, while a finite change failed. The
+    # same class as issue #5. Malformed counts now recompute to MALFORMED, which never matches a recorded status.
+    ok = all(count(v.get(k)) for k in ("failed_probes", "total_probes", "meaningful_probes", "meaningful_passes"))
+    cov = v.get("min_coverage")
+    if not ok or isinstance(cov, bool) or not isinstance(cov, (int, float)) or not math.isfinite(cov) \
+            or not 0 <= cov <= 1 or v["meaningful_passes"] > v["meaningful_probes"] or v["meaningful_probes"] > v["total_probes"]:
+        return "MALFORMED"
     if v["failed_probes"] > 0:
         return "FAILED"
     total, mp, mpass = v["total_probes"], v["meaningful_probes"], v["meaningful_passes"]
@@ -685,10 +698,18 @@ def recompute_vehicle(m, artifact):
     return m.get("output_sha256")
 
 
+MAX_CHAIN_ROUNDS = 10_000_000  # make_package default is 200000
+
+
 def recompute_measurement(m, artifact):
     if m.get("kind") == "sha256_chain":
+        # rounds must be a plain int in range: Infinity crashed the verifier and 1e12 would loop for hours
+        # (found 2026-09-30, tools/nonfinite_probe.py). An out-of-range value fails the check, it is not run.
+        r = m.get("rounds")
+        if type(r) is not int or not 1 <= r <= MAX_CHAIN_ROUNDS:
+            return f"rounds {r!r} refused: need an int in 1..{MAX_CHAIN_ROUNDS}"
         h = artifact
-        for _ in range(int(m["rounds"])):
+        for _ in range(r):
             h = hashlib.sha256(h).digest()
         return h.hex()
     if m.get("kind") == "model_answer_check":

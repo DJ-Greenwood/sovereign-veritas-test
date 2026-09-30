@@ -99,7 +99,7 @@ def test_t2_gate_consequence_and_verifies(tmp_path, overrides, status, decision,
     executed = pkg["provenance"]["chain"][-1]["record"]["metadata"].get("execution_status")
     assert (executed is not None) == (decision == "ALLOW")
     assert ver.returncode == 0, ver.stdout
-    assert f"PASS  thermal_status_derived" in ver.stdout and f"recomputed {status}" in ver.stdout
+    assert "PASS  thermal_status_derived" in ver.stdout and f"recomputed {status}" in ver.stdout
     assert "the four statements, resource state measured" in ver.stdout
 
 

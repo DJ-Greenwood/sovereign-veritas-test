@@ -21,6 +21,12 @@
 
 ## VERIFIED — automated tests
 
+**Latest (2026-09-30): the issue #5 class, searched everywhere** ([docs/NONFINITE_PROBE.md](docs/NONFINITE_PROBE.md)).
+A differential probe over every numeric field of the 8 stored packages found 3 fail-open cases (NaN or
+−Infinity in `failed_probes`, −Infinity in `min_coverage` verified CONSISTENT) and 1 crash (`rounds` =
+Infinity). Writing the regression test found a fourth: `rounds` = 10¹² ran effectively forever. All four
+are fixed; the probe now reports 0 and 0; 413 passed and verifier mutants 27 of 27 killed (container). S25: NOT VALIDATED.
+
 **Latest (2026-09-28): Issue #5 closed** (commit `2902a2c`). Non-finite telemetry and
 non-canonical witness prefixes are refused. Registration: [docs/ISSUE_5_RESPONSE.md](docs/ISSUE_5_RESPONSE.md).
 
