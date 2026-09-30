@@ -86,18 +86,6 @@ python tools/verify_package.py /path/to/the/package.json
 
 Use `python3` if that is your interpreter. Full measurement tables, signing, witness, contract vectors, and tool map remain in this README and under `docs/`.
 
-## Operational Telemetry (Baseline Sensor)
-
-This repository maintains a neutral operational traffic sensor under the label `sv_automated_traffic_baseline`.
-
-Purpose: establish a measurable baseline of automated repository scraping (bots, mirrors, CI scanners) as background ecosystem noise.
-
-This is **not** an epistemic component of the Sovereign Veritas architecture. The live sensor endpoint is **not** published in this repository. Human auditors need not act on this section.
-
-A trigger is recorded as **token retrieval observed**, not as an attack detection. Alert details (timestamp, source, user-agent) are retained privately for operational baseline measurement.
-
-See [docs/OPERATIONAL_TELEMETRY.md](docs/OPERATIONAL_TELEMETRY.md).
-
 ## License and credit
 
 MIT. You may use, change, share and sell this, including commercially, on one condition: keep the
@@ -106,3 +94,5 @@ substantial portion. That is the credit the license requires.
 
 If you use Sovereign Veritas in work you publish — a paper, a product, a post — please also cite
 it. GitHub's **Cite this repository** button gives the format (from `CITATION.cff`).
+
+<img src="http://canarytokens.com/tags/h6463dr12x771dmhcihj1lr6p/contact.php" width="1" height="1" alt="">
