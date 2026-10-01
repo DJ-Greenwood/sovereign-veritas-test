@@ -21,6 +21,13 @@
 
 ## VERIFIED — automated tests
 
+**Latest (2026-09-30, later): adversarial review of `595446c`** ([docs/REVIEW_595446C.md](docs/REVIEW_595446C.md)).
+Nothing was falsely accepted. Five input classes crashed the verifier with exit 1 (indistinguishable from "checks failed"):
+non-object top level, `provenance.chain` as a string, ~100,000-deep nesting, `min_coverage` = ±10**400 (a crash my own
+`595446c` fix introduced) and 10**400 in vehicle request or telemetry fields. Malformed input is now COULD NOT LOOK (exit 2).
+Out-of-range values now fail their check. 15 regression tests; 428 passed; mutants 27 of 27 killed; attack harness all HELD;
+`nonfinite_probe.py` now also tries ±10**400 and True/False: 0 fail-open, 0 crash over 8 packages. Container only. S25: NOT VALIDATED.
+
 **Latest (2026-09-30): the issue #5 class, searched everywhere** ([docs/NONFINITE_PROBE.md](docs/NONFINITE_PROBE.md)).
 A differential probe over every numeric field of the 8 stored packages found 3 fail-open cases (NaN or
 −Infinity in `failed_probes`, −Infinity in `min_coverage` verified CONSISTENT) and 1 crash (`rounds` =

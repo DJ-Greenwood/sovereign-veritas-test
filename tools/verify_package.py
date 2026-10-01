@@ -474,8 +474,9 @@ def validation_status(v):
     # same class as issue #5. Malformed counts now recompute to MALFORMED, which never matches a recorded status.
     ok = all(count(v.get(k)) for k in ("failed_probes", "total_probes", "meaningful_probes", "meaningful_passes"))
     cov = v.get("min_coverage")
-    if not ok or isinstance(cov, bool) or not isinstance(cov, (int, float)) or not math.isfinite(cov) \
-            or not 0 <= cov <= 1 or v["meaningful_passes"] > v["meaningful_probes"] or v["meaningful_probes"] > v["total_probes"]:
+    # Range before isfinite: math.isfinite(10**400) raises OverflowError (found 2026-09-30, type-variant probe).
+    # NaN fails "0 <= cov <= 1", so the range test alone also refuses NaN and both infinities.
+    if not ok or isinstance(cov, bool) or not isinstance(cov, (int, float)) or not 0 <= cov <= 1 or v["meaningful_passes"] > v["meaningful_probes"] or v["meaningful_probes"] > v["total_probes"]:
         return "MALFORMED"
     if v["failed_probes"] > 0:
         return "FAILED"
@@ -603,11 +604,12 @@ def distance_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7):
 
 def is_finite_number(value):
     """True only for numeric values with a finite IEEE-754 representation."""
-    return (
-        not isinstance(value, bool)
-        and isinstance(value, (int, float))
-        and math.isfinite(value)
-    )
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:  # an int beyond float range (JSON allows 10**400) has no finite IEEE-754 form
+        return False
 
 
 def vehicle_check(req, snap):
@@ -971,6 +973,8 @@ def main():
         with open(path, "rb") as fh:
             data = fh.read()
         pkg = json.loads(data.decode("utf-8"))
+        if not isinstance(pkg, dict):
+            raise ValueError(f"top level is {type(pkg).__name__}, not an object")
         checks = verify(pkg, allow_recorded_only=allow)
         if sig is not None:
             ok, detail = check_signature(data, *sig)
@@ -984,7 +988,10 @@ def main():
     except WitnessUnreadable as exc:
         print(f"COULD NOT LOOK: witness log unusable: {exc}")
         sys.exit(2)
-    except (OSError, ValueError, KeyError, TypeError, IndexError) as exc:
+    # AttributeError: a list/str where an object is expected (e.g. provenance.chain = "x").
+    # RecursionError: nesting deeper than the JSON decoder allows. Both were uncaught tracebacks (exit 1,
+    # indistinguishable from "checks failed") until 2026-09-30; malformed input is COULD NOT LOOK (exit 2).
+    except (OSError, ValueError, KeyError, TypeError, IndexError, AttributeError, RecursionError) as exc:
         print(f"COULD NOT LOOK: {type(exc).__name__}: {exc}")
         sys.exit(2)
     for name, ok, detail in checks:

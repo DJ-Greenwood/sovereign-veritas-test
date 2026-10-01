@@ -3,7 +3,8 @@
 
 For every numeric field of a package, reseal three variants and verify each:
   - a large finite change (7v + 1001),
-  - NaN, +Infinity, -Infinity.
+  - NaN, +Infinity, -Infinity, +-10**400 (vs the finite change),
+  - True, False (vs the int of the same value).
 A FAIL-OPEN is a field where the finite change FAILS but a non-finite value verifies CONSISTENT: the
 check reads the field, and NaN/Infinity slip past it (issue #5: battery_pct = NaN passed a takeoff
 check). A CRASH is any uncaught exception in the verifier. Reseal recomputes the digests the way an
@@ -16,7 +17,7 @@ checks, not the signature).
 Exit 0 only if no FAIL-OPEN and no CRASH. Found on its first run (2026-09-30): failed_probes and
 min_coverage fail-open, rounds = Infinity crash (fixed in verify_package.py the same day).
 """
-import contextlib, copy, glob, importlib.util, io, json, os, sys, tempfile
+import contextlib, copy, glob, importlib.util, io, json, math, os, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -71,6 +72,11 @@ def put(o, path, v):
     o[path[-1]] = v
 
 
+# NaN/Infinity: the issue #5 class. 10**400: JSON allows it, float() overflows on it (min_coverage crashed on it,
+# 2026-09-30). True/False: bool is an int subclass in Python, so ">= 0" style checks accept it.
+SPECIALS = (float("nan"), float("inf"), float("-inf"), 10 ** 400, -10 ** 400, True, False)
+
+
 def probe(vp, pkg, tmp):
     fail_open, crashes, n = [], [], 0
     for path, v in leaves(pkg):
@@ -80,14 +86,23 @@ def probe(vp, pkg, tmp):
         fin = copy.deepcopy(pkg)
         put(fin, path, v * 7 + 1001)
         fin_rc = verify_rc(vp, reseal(vp, fin), tmp)
-        for special in (float("nan"), float("inf"), float("-inf")):
+        for special in SPECIALS:
+            if isinstance(special, bool):
+                # a bool is judged against the int of the same value: FAIL-OPEN only if True passes where
+                # 1 fails (or False where 0 fails). Against 7v+1001 an in-range True would look like a
+                # finding when any in-range int passes too.
+                ctl = copy.deepcopy(pkg)
+                put(ctl, path, int(special))
+                control_rc = verify_rc(vp, reseal(vp, ctl), tmp)
+            else:
+                control_rc = fin_rc
             sp = copy.deepcopy(pkg)
             put(sp, path, special)
             rc = verify_rc(vp, reseal(vp, sp), tmp)
-            name = ".".join(map(str, path)) + " = " + str(special)
-            if isinstance(rc, str) or isinstance(fin_rc, str):
-                crashes.append(name + f" ({rc if isinstance(rc, str) else fin_rc})")
-            elif fin_rc != 0 and rc == 0:
+            name = ".".join(map(str, path)) + " = " + (str(special) if abs(special) < 1e300 else f"{'-' if special < 0 else ''}10**400")
+            if isinstance(rc, str) or isinstance(control_rc, str):
+                crashes.append(name + f" ({rc if isinstance(rc, str) else control_rc})")
+            elif control_rc != 0 and rc == 0:
                 fail_open.append(name)
     return n, fail_open, crashes
 
@@ -108,7 +123,16 @@ def main():
         _, fo, _ = probe(vp, pkg, tmp)
         ok = any("failed_probes" in f for f in fo)
         print(f"self-test: planted rule -> {len(fo)} FAIL-OPEN found ({'PASS' if ok else 'FAIL: the probe is vacuous'})")
-        sys.exit(0 if ok else 1)
+        # second plant: the 595446c min_coverage check (isfinite before the range test) crashed on 10**400
+        def rule_595446c(v):
+            if not math.isfinite(v["min_coverage"]) or not 0 <= v["min_coverage"] <= 1:
+                return "MALFORMED"
+            return old_rule(v)
+        vp.validation_status = rule_595446c
+        _, _, cr = probe(vp, pkg, tmp)
+        ok2 = any("min_coverage = 10**400" in c for c in cr)
+        print(f"self-test: planted 595446c rule -> {len(cr)} CRASH found ({'PASS' if ok2 else 'FAIL: the probe is vacuous'})")
+        sys.exit(0 if ok and ok2 else 1)
     files = args or sorted(glob.glob(os.path.join(ROOT, "evidence", "sv_package_*.json")))
     total_bad = 0
     for f in files:
@@ -116,7 +140,7 @@ def main():
         base = verify_rc(vp, reseal(vp, copy.deepcopy(pkg)), tmp)
         n, fo, cr = probe(vp, pkg, tmp)
         total_bad += len(fo) + len(cr)
-        print(f"{os.path.basename(f)}: baseline exit {base}, {n} numeric fields x 3 non-finite values: "
+        print(f"{os.path.basename(f)}: baseline exit {base}, {n} numeric fields x {len(SPECIALS)} special values: "
               f"{len(fo)} FAIL-OPEN, {len(cr)} CRASH")
         for x in fo[:10] + cr[:10]:
             print("   ", x)

@@ -49,3 +49,21 @@ VERDICT  no fail-open, no crash over 8 package(s)
 - Reseal is the attacker who lacks the signing key. A signed package also needs the key; this probes
   the checks, not the signature.
 - Container only (x86_64). On the S25: **NOT VALIDATED**.
+
+
+## Addendum (2026-09-30, later): ±10**400 and True/False
+
+The adversarial review of `595446c` ([REVIEW_595446C.md](REVIEW_595446C.md)) found that `min_coverage` = 10**400
+crashed the check this probe's first round added (`math.isfinite` overflows on a huge int). The probe now also tries
+±10**400 (against the finite change) and True/False (against the int of the same value). The output above is the first
+round, kept as it was. After the fix:
+
+```
+self-test: planted rule -> 5 FAIL-OPEN found (PASS)
+self-test: planted 595446c rule -> 3 CRASH found (PASS)
+sv_package_118a02b75646.json: baseline exit 0, 196 numeric fields x 7 special values: 0 FAIL-OPEN, 0 CRASH
+VERDICT  no fail-open, no crash over 8 package(s)
+```
+
+Known gap: the probe does not recompute the artifact, input or output digests, so fields behind them are out of reach.
+The vehicle-field crash (F5) was found by reading the code, not by this probe.
