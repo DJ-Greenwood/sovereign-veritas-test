@@ -59,3 +59,16 @@ VERDICT  8 of 8 as registered
 - Whether any real executor in this repository (`tools/*_action.py`) is exposed in practice depends on
   whether its callers can repeat a `record_id`. Not audited here.
 - The fix is a separate change (`fix/xb1-refuse-before-effect`). Its registered reach is X1–X3 only.
+
+## Fix status (updated when PR #8 merged)
+
+| Case | Status | Mechanism |
+|---|---|---|
+| X1–X3 sequential repeat (memory, file, reload) | **CLOSED** — 1 effect | `EvidenceWorkflow.run()` asks `sink.has_record()` before anything runs |
+| X4 concurrent race | **OPEN** | check-then-act; needs an atomic reservation |
+| X5 effect, then record write fails | **OPEN** | needs a durable intent before the effect, plus a way to learn what happened |
+| sink without `has_record` | **OPEN, by choice** | no pre-check (backward compatible); not "missing means deny" |
+
+X4 and X5 are limits of the workflow and ledger, not of the Gate's decision contract (`sv.gate/0`), so
+they are not filed under `sv.gate/1`. Probe: `python tools/execution_boundary_probe.py --expect-fix`
+gives 8 of 8 as registered after the fix (X1–X3 at 1 effect; X4, X5 unchanged).
