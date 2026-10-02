@@ -289,3 +289,9 @@ substantial portion. That is the credit the license requires.
 
 If you use Sovereign Veritas in work you publish — a paper, a product, a post — please also cite
 it. GitHub's **Cite this repository** button gives the format (from `CITATION.cff`).
+
+If your system draws on this work, a suggested acknowledgment and the rules this project uses to assess
+influence claims in both directions (SUPPORTED / NOT SUPPORTED / INDETERMINATE) are in
+[docs/LINEAGE.md](docs/LINEAGE.md). The underlying principles (fail-closed, separation of authorization
+from execution, independent verification) are established prior art; what this project can be credited for
+is its formulation and implementation of them.
