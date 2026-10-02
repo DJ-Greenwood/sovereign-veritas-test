@@ -501,7 +501,7 @@ def predictions(rows):
         ("V14a anti-vacuity: honest ALLOW 200/200 no LAND 0 m; A1 refused (C1) / landed pre-request (C2)",
          v14a_i and v14a_ii,
          f"A0 allow {[r['allow'] for r in a0u]} land {[r['land'] for r in a0u]}; "
-         f"A1 C1 {a1c1['refuse']} REFUSE ({a1c1['why'][:48]}), C2 LAND t={a1c2['land_tick']}"),
+         f"A1 C1 {a1c1['refuse']} REFUSE ({a1c1['why'][:60]}), C2 LAND t={a1c2['land_tick']}"),
         ("V14b corridor A2: ALLOW, no LAND, 28.50 +-0.05 m in C1 and C2", v14b,
          f"C1 {a2[0]['max_breach_m']} m, C2 {a2[1]['max_breach_m']} m, LAND {[r['land'] for r in a2]}"),
         ("V14c A3: C1 ALLOW and >= 100 m; C2 LAND mid-flight, 0.00 m", v14c,
@@ -524,7 +524,8 @@ def digest(rows, held):
 
 
 # The outcome of the registered run, pinned after it (docs/V14_CORRIDOR_RESULTS.md). None = not yet run.
-RECORDED = None
+RECORDED = ((True, True, True, True, True, True, True, True),
+            "4f09350ea05ee3d30ee9e2cd69c62d5fd459ddcb5984cd700c94509369afa665")
 
 
 def main_registered(args):

@@ -36,6 +36,8 @@ jobs:
           python tools/make_package.py --thermal-status measured | tee measured.txt
           f=$(awk '/^package /{print $2}' measured.txt)
           python tools/verify_package.py "$f"
+      - name: V14 corridor - registered outcome reproduced on every platform (docs/V14_CORRIDOR_RESULTS.md)
+        run: python tools/corridor_challenge.py | tail -4
 
   port-go:
     # C6 (docs/GATE_CONTRACT.md): the Go port of sv.gate/0 must reproduce the conformance digest.
@@ -80,6 +82,15 @@ jobs:
           set +e; python tools/xb2_boundary_probe.py --sabotage > xb2_sab.txt; rc=$?; set -e
           tail -3 xb2_sab.txt
           test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
+      - name: V14 corridor can fail (--sabotage never executes the monitor's LAND -> exit 1)
+        run: |
+          set +e; python tools/corridor_challenge.py --sabotage > v14_sab.txt; rc=$?; set -e
+          tail -3 v14_sab.txt
+          test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
+      - name: V14 challenger protocol - the example attacker reproduces A4 through a separate process
+        run: |
+          python tools/corridor_challenge.py --attacker "python tools/corridor_attacker_example.py" | tee v14_ext.txt
+          grep -q "VERDICT  NO BREAK: max breach 30.9500 m" v14_ext.txt
       - name: Fetch vacuity_lint, pinned
         run: |
           git clone -q https://github.com/holland202/vacuity_lint.py "$RUNNER_TEMP/vl"

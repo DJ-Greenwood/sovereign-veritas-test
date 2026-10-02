@@ -428,3 +428,8 @@ The cross-check above runs once, when a command is requested; nothing re-checks 
 asks how far a GNSS spoofer can drive the vehicle after the ALLOW, what bound the same cross-check gives
 if it runs on every reading, and what that bound rests on. Registered in `docs/V14_CORRIDOR_PREREG.md`;
 results will go in `docs/V14_CORRIDOR_RESULTS.md`.
+
+**V14 result (2026-10-02):** 8 of 8 as registered, in a kinematic model, not on SITL
+(`docs/V14_CORRIDOR_RESULTS.md`). After the ALLOW, today's request-time check bounds nothing. The same
+check re-run on every reading bounds the breach at about 31 m, given an independent source and a LAND
+that does not navigate by GNSS.

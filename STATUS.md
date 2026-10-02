@@ -61,13 +61,16 @@ its registration and results in the named doc:
 - A simulated drone (docs/VEHICLE_ACTION.md): V1-V11 in ArduCopter SITL; a slow GPS spoof walks the
   vehicle 61 m outside its fence with every check passing (V11); a cross-check against an
   independent position (a stand-in, not a sensor) refuses it (V12), and flaps at its threshold
-  (V12c refuted; V13 registered). Simulation only; not for GNSS-contested use.
+  (V12c refuted); the V13 latch removes the flapping. V14 (docs/V14_CORRIDOR_RESULTS.md): the check runs
+  only at request time, so a spoof started after the ALLOW is unbounded in a model (117.5 m); re-run every
+  reading it bounds the breach at about 31 m, if the second source is independent and LAND does not
+  navigate by GNSS. Simulation only; not for GNSS-contested use.
 - Issue #4 (docs/ISSUE_4_RESPONSE.md): all eleven breaks accepted; B4 and B11 fixed; the rest
   assigned to sv.gate/1.
 - Issue #5 (docs/ISSUE_5_RESPONSE.md): two implementation defects accepted and fixed (non-finite
   checker, non-canonical witness anchor). Credit: Nicholas Kouns.
 
-Open: V13; sv.gate/1 and sv.package/1 (issue #4); B6b and a second-author implementation; G1 (record
+Open: V14i (the in-flight monitor on SITL); sv.gate/1 and sv.package/1 (issue #4); B6b and a second-author implementation; G1 (record
 the server's devices in model packages).
 
 **213 passed** @ 2033088 (Termux / S25, 16.01 s). Measured thermal status on the S25: at rest `normal` -> ALLOW; after 30 s all-core load `hot` (cpu_core 103.8 °C) -> DEFER; both packages 19 of 19 checks, the verifier recomputing the status. Limits uncalibrated (policy `s25-uncalibrated-v0`). See `docs/EVIDENCE_PACKAGE.md`.
