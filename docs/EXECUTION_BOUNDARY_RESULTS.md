@@ -1,0 +1,49 @@
+# XB-1 results — Davorin Popović's report REPRODUCED; 8 of 8 cases as registered
+
+Registration: `docs/EXECUTION_BOUNDARY_PREREG.md` (committed 7a8351e, before the probe existed).
+Probe: `python tools/execution_boundary_probe.py`. x86-64 container, Python 3.13.15.
+**NOT VALIDATED on the S25.** Pinned in CI (red-team job).
+
+## Failures first
+
+At both `386716a` (the commit Davorin cited) and `794a86b` (main after PR #6), `EvidenceWorkflow.run()`
+lets the external effect happen before the ledger can refuse it:
+
+- **X1–X3 — duplicate `record_id` → 2 external effects, 1 ledger record.** In memory, on disk, and
+  across a reload of the on-disk ledger. The ledger's duplicate check works; it runs after `execute()`.
+  `RECORD_REJECTED ≠ EXTERNAL_EFFECT_REVERSED`, measured.
+- **X4 — two threads, same `record_id` → 2 effects, 1 record.**
+- **X5 — executor succeeds, write fails → 1 effect, 0 records.** The world changed and the evidence
+  chain does not know. This is the case no duplicate check can reach.
+
+Davorin's observation moves from REPORTED to **REPRODUCED (independently, by a second probe)**. The
+external party remains the origin; the reproduction is this file.
+
+## Transcript (main, 794a86b — 386716a gave the identical eight lines)
+
+```
+XB-1 | expecting the current code
+AS REGISTERED      X0   effects 2 records 2 errors 0  (registered 2/2/0)  first error: -
+AS REGISTERED      X0r  effects 0 records 1 errors 0  (registered 0/1/0)  first error: -
+AS REGISTERED      X1   effects 2 records 1 errors 1  (registered 2/1/1)  first error: ValueError: duplicate record_id: dup
+AS REGISTERED      X2   effects 2 records 1 errors 1  (registered 2/1/1)  first error: ValueError: duplicate record_id: dup
+AS REGISTERED      X3   effects 2 records 1 errors 1  (registered 2/1/1)  first error: ValueError: duplicate record_id: dup
+AS REGISTERED      X4   effects 2 records 1 errors 1  (registered 2/1/1)  first error: ValueError: duplicate record_id: race
+AS REGISTERED      X5   effects 1 records 0 errors 1  (registered 1/0/1)  first error: OSError: simulated write failure (disk full)
+AS REGISTERED      X6   effects 0 records 1 errors 1  (registered 0/1/1)  first error: RuntimeError: executor failed before any effect
+VERDICT  8 of 8 as registered
+```
+
+## What held
+
+- X0 / X0r (anti-vacuity): distinct IDs give 2 effects and 2 records with no error; a REFUSE gives 0
+  effects. The probe is not counting everything as a duplicate.
+- X6: an executor that fails before any effect is recorded with `execution_status = FAILED`.
+
+## Scope boundary (what this does not show)
+
+- Authority revalidation at execution (T1 → T2) is not reachable through `run()`: the Gate and the
+  execution share one call and there is no deferred-execution API. Door left open in the PREREG.
+- Whether any real executor in this repository (`tools/*_action.py`) is exposed in practice depends on
+  whether its callers can repeat a `record_id`. Not audited here.
+- The fix is a separate change (`fix/xb1-refuse-before-effect`). Its registered reach is X1–X3 only.
