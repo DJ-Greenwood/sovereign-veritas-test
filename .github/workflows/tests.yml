@@ -71,6 +71,8 @@ jobs:
         run: python tools/gate_constraint.py --target . --mutants
       - name: Every reachable rule of the Gate is pinned by a contract vector
         run: python tools/gate_contract.py --mutants
+      - name: XB-1 execution boundary - recorded outcome (duplicate record_id gives 2 external effects; docs/EXECUTION_BOUNDARY_RESULTS.md)
+        run: python tools/execution_boundary_probe.py
       - name: Fetch vacuity_lint, pinned
         run: |
           git clone -q https://github.com/holland202/vacuity_lint.py "$RUNNER_TEMP/vl"
