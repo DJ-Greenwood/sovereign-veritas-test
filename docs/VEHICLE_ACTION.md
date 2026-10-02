@@ -421,3 +421,10 @@ V13 latch (3 over / 3 under 80%): PASS->FAIL 1, FAIL->PASS 0
   up to two readings of delay (here, one per second) against the single-reading rule.
 - **Limit:** one run, one ramp rate, one noise level. It shows the latch removes flapping at this
   threshold. It does not show the right `k` or release fraction for a real sensor.
+
+## V14 (registered 2026-10-02, before any code for it)
+
+The cross-check above runs once, when a command is requested; nothing re-checks during the flight. V14
+asks how far a GNSS spoofer can drive the vehicle after the ALLOW, what bound the same cross-check gives
+if it runs on every reading, and what that bound rests on. Registered in `docs/V14_CORRIDOR_PREREG.md`;
+results will go in `docs/V14_CORRIDOR_RESULTS.md`.
