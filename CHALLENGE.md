@@ -42,6 +42,46 @@ written from `CONTRACT.md` alone, by someone else, is the missing check. Agreeme
 A disagreement is credited too: it means the contract or this implementation is underspecified, and
 that is the more useful result.
 
+## Corroboration corridor (V14, a separate track, also credited)
+
+`docs/V14_CORRIDOR_PREREG.md` registers a bound, and `docs/V14_CORRIDOR_RESULTS.md` records that it held
+against the reference attackers and a 1,000-attacker search. Break it.
+
+**Claim:** in `tools/corridor_challenge.py`, configuration C2, with an independent root and adversarial
+noise, no attacker drives the simulated vehicle more than **B = 31.1 m** outside its 300 m fence. In C2:
+
+- the Gate checks the request;
+- the V13 latch then re-runs the cross-check on every reading;
+- a latch FAIL lands the vehicle without horizontal position hold.
+
+**What the attacker controls:**
+
+- the GNSS offset, moving it at most 1 m per tick;
+- the independent position's error, anywhere within 5 m;
+- it also sees everything: the true position, the readings, the setpoint and the latch counters.
+
+**A break:** a program in any language, speaking the JSON-lines protocol in the harness docstring, for
+which this prints `VERDICT  BREAK`:
+
+    python tools/corridor_challenge.py --attacker "<your program>"
+
+The harness, model, check, latch and Gate must be unchanged. `tools/corridor_attacker_example.py` is a
+working starting point; it reaches 30.95 m. The best attack known to the author reaches 31.00 m.
+
+**Also a break:** getting the harness to accept an attacker that violates either limit (a GNSS move of
+more than 1 m in one tick, or an error of more than 5 m).
+
+**These do not count.** They are published results:
+
+- C1 (today's request-time-only path; 117.5 m);
+- the corridor (28.5 m, inside the bound);
+- a common-root independent source;
+- C2g (LAND on GNSS);
+- anything the harness reports as OUT OF MODEL.
+
+Criticism of the model's realism (lag, overshoot, wind) is welcome, as a registered experiment, and is
+credited. It is not a break of this claim.
+
 ## Start here
 
     git clone https://github.com/holland202/sovereign-veritas && cd sovereign-veritas

@@ -1,0 +1,44 @@
+reference rows done; running the 1,000-attacker search
+V14 corroboration corridor | B = 31.1 m (C2), B_s = 29.1 m (C2s) | registered in docs/V14_CORRIDOR_PREREG.md
+attacker/noise/config/root             runs allow refuse none land oom    max m  mean m  land_t
+A0/adversarial/C1/independent             1     1      0    0    0   0     0.00    0.00  None
+A0/adversarial/C2s/independent            1     1      0    0    0   0     0.00    0.00  None
+A0/adversarial/C2/independent             1     1      0    0    0   0     0.00    0.00  None
+A0/adversarial/C2g/independent            1     1      0    0    0   0     0.00    0.00  None
+A1/adversarial/C1/independent             1     0      1    0    0   0     0.00    0.00  None
+A1/adversarial/C2s/independent            1     0      0    1    1   0     0.00    0.00  30
+A1/adversarial/C2/independent             1     0      0    1    1   0     0.00    0.00  32
+A1/adversarial/C2g/independent            1     0      0    1    1   0     0.00    0.00  32
+A2/adversarial/C1/independent             1     1      0    0    0   0    28.50   28.50  None
+A2/adversarial/C2s/independent            1     1      0    0    0   0    28.50   28.50  None
+A2/adversarial/C2/independent             1     1      0    0    0   0    28.50   28.50  None
+A2/adversarial/C2g/independent            1     1      0    0    0   0    28.50   28.50  None
+A3/adversarial/C1/independent             1     1      0    0    0   0   117.50  117.50  None
+A3/adversarial/C2s/independent            1     1      0    0    1   0     0.00    0.00  71
+A3/adversarial/C2/independent             1     1      0    0    1   0     0.00    0.00  73
+A3/adversarial/C2g/independent            1     1      0    0    1   0     0.00    0.00  73
+A4/adversarial/C1/independent             1     1      0    0    0   0    88.95   88.95  None
+A4/adversarial/C2s/independent            1     1      0    0    1   0    28.95   28.95  100
+A4/adversarial/C2/independent             1     1      0    0    1   0    30.95   30.95  102
+A4/adversarial/C2g/independent            1     1      0    0    1   0    59.95   59.95  102
+A3/adversarial/C2/common                  1     1      0    0    0   0   117.50  117.50  None
+A4/adversarial/C2/common                  1     1      0    0    0   0    88.95   88.95  None
+A0/uniform/C1/independent               200   200      0    0    0   0     0.00    0.00  
+A0/uniform/C2s/independent              200   200      0    0    0   0     0.00    0.00  
+A0/uniform/C2/independent               200   200      0    0    0   0     0.00    0.00  
+A0/uniform/C2g/independent              200   200      0    0    0   0     0.00    0.00  
+A0/gauss10/C1/independent               200   187     13    0    0   0     0.00    0.00  
+A0/gauss10/C2s/independent              200    36      3  161  200   0     0.00    0.00  
+A0/gauss10/C2/independent               200   187     13    0    1   0     0.00    0.00  
+search/adversarial/C2/independent      1000   989      2    9  284   0    30.71    8.71  
+HELD     V14a anti-vacuity: honest ALLOW 200/200 no LAND 0 m; A1 refused (C1) / landed pre-request (C2) A0 allow [200, 200, 200, 200] land [0, 0, 0, 0]; A1 C1 1 REFUSE (autopilot and independent position disagree by 3), C2 LAND t=32
+HELD     V14b corridor A2: ALLOW, no LAND, 28.50 +-0.05 m in C1 and C2                                C1 28.5 m, C2 28.5 m, LAND [0, 0]
+HELD     V14c A3: C1 ALLOW and >= 100 m; C2 LAND mid-flight, 0.00 m                                   C1 117.5 m; C2 LAND t=73, 0.0 m
+HELD     V14d bound: C2 refs <= B=31.1; A4 C2 30.95, C2s 28.95 (+-0.05)                               C2 max 30.95 m; A4 C2 30.95, C2s 28.95
+HELD     V14e search: 1,000 attackers in C2, none > B, none OUT OF MODEL                              max 30.71 m (attacker 307), OOM 0, LAND 284
+HELD     V14f C2g (LAND on GNSS), A4: >= B + 20 = 51.1 m                                              59.95 m
+HELD     V14g common root, A3 in C2: no LAND, >= 100 m                                                LAND 0, 117.5 m
+HELD     V14h gauss10 honest: C2s LAND >= 180, C2 <= 10, C1 REFUSE 2..20 (of 200)                     C2s 200, C2 1, C1 REFUSE 13
+VERDICT  8 of 8 as registered
+DIGEST   4f09350ea05ee3d30ee9e2cd69c62d5fd459ddcb5984cd700c94509369afa665
+RECORDED none yet: this is the first run; pin the outcome above in RECORDED
