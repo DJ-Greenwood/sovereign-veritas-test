@@ -82,6 +82,9 @@ class FileLedger(Ledger):
 
         self.verify()
 
+    def contains(self, record_id: str) -> bool:
+        return any(existing.record_id == record_id for existing in self._records)
+
     def append(self, record: EvidenceRecord) -> EvidenceRecord:
         """Durably append one record before advancing in-memory state.
 

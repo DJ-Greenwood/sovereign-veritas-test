@@ -69,6 +69,14 @@ class EvidenceWorkflow:
         metadata: dict[str, Any] | None = None,
         verifier_id: str | None = None,
     ) -> WorkflowResult:
+        # XB-1 (docs/EXECUTION_BOUNDARY_RESULTS.md): the sink's duplicate check runs inside record(),
+        # i.e. after execute(), so a repeated record_id produced a second external effect before the
+        # ledger refused it. Refuse it here, before anything runs. Covers sequential repeats only: a
+        # concurrent race (X4) and an effect whose record fails to write (X5) are NOT closed by this.
+        has_record = getattr(self.evidence_sink, "has_record", None)
+        if has_record is not None and has_record(record_id):
+            raise ValueError(f"duplicate record_id refused before execution: {record_id}")
+
         observation = self.sensor.observe()
         prediction = self.predictor.predict(observation)
 

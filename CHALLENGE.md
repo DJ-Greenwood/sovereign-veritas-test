@@ -24,8 +24,9 @@ that does not extend one it has already seen.
 - The companion route check trusts the companion's own labels (`docs/COMPANION_ACTION.md`).
 - A repeated `record_id`, a concurrent race, or a record write that fails after `execute()` producing
   more external effects than ledger records in `EvidenceWorkflow.run()` (XB-1,
-  `docs/EXECUTION_BOUNDARY_RESULTS.md`; credited to Davorin Popović). A break of whatever fix lands for it
-  *does* count.
+  `docs/EXECUTION_BOUNDARY_RESULTS.md`; credited to Davorin Popović). Exception: the sequential case is
+  fixed (PR #8), so getting a second external effect from a **sequential** repeat of a `record_id` through a
+  sink that implements `has_record` **does** count as a break.
 
 ## Reimplement the Gate (also credited)
 
