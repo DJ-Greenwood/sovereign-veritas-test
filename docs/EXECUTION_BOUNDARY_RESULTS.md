@@ -4,6 +4,13 @@ Registration: `docs/EXECUTION_BOUNDARY_PREREG.md` (committed 7a8351e, before the
 Probe: `python tools/execution_boundary_probe.py`. x86-64 container, Python 3.13.15.
 **NOT VALIDATED on the S25.** Pinned in CI (red-team job).
 
+## External observation
+
+Davorin Popović identified a potential execution/evidence atomicity issue in `EvidenceWorkflow.run()`.
+His reported probe prompted the XB-1 investigation. The project independently reproduced the behavior,
+preregistered the experimental cases, and documented the resulting findings and limitations. Credit is
+for the observation; he has not reviewed or endorsed these results or any proposed fix.
+
 ## Failures first
 
 At both `386716a` (the commit Davorin cited) and `794a86b` (main after PR #6), `EvidenceWorkflow.run()`
