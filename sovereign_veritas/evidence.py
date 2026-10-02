@@ -237,6 +237,9 @@ class Ledger:
     def all(self) -> list[EvidenceRecord]:
         return list(self._records)
 
+    def contains(self, record_id: str) -> bool:
+        return any(existing.record_id == record_id for existing in self._records)
+
     def verify(self) -> bool:
         previous: str | None = None
         for index, record in enumerate(self._records):
@@ -266,3 +269,8 @@ class LedgerSink:
 
     def record(self, record: EvidenceRecord) -> EvidenceRecord:
         return self.ledger.append(record)
+
+    def has_record(self, record_id: str) -> bool:
+        """XB-1: lets EvidenceWorkflow refuse a duplicate record_id before any external effect."""
+        contains = getattr(self.ledger, "contains", None)
+        return bool(contains(record_id)) if contains is not None else False
