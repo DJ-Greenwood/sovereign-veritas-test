@@ -28,6 +28,9 @@ ok  3 authorization revoked, digests resealed    exit 1  VERDICT  1 check(s) fai
 DEMO PASS
 ```
 
+**Try to break it:** [CHALLENGE.md](CHALLENGE.md). Breaks are credited by name in STATUS.md, and so are
+independent reimplementations of the Gate that reproduce the contract digest.
+
 ### Negative results, up front
 
 - **A fully consistent rewrite verifies.** If an attacker changes the inputs *and* the decision
@@ -35,6 +38,11 @@ DEMO PASS
   with the Gate's rules. It does not mean the recorded world state is true.
 - **A slow GPS spoof walked a simulated ArduCopter 61 m outside its fence while every check passed**
   (V11, [docs/VEHICLE_ACTION.md](docs/VEHICLE_ACTION.md)).
+- **A repeated `record_id` causes two real external effects and one ledger record** (XB-1,
+  [docs/EXECUTION_BOUNDARY_RESULTS.md](docs/EXECUTION_BOUNDARY_RESULTS.md); reported by Davorin
+  Popović, reproduced here). The ledger's duplicate check runs after `execute()`. A two-thread race does the
+  same, and a write failure after a successful execute leaves an effect with no record. Candidate fix for the
+  sequential case only: PR #8, open.
 - **"PASS" and "authorized" are labels the caller writes.** An external review filed eleven breaks
   ([issue #4](https://github.com/holland202/sovereign-veritas/issues/4)). Two are fixed; the rest are
   assigned to `sv.gate/1`.
@@ -232,6 +240,8 @@ one takes from them is named in `docs/INTEGRATION.md` with the commit it came fr
 - [eace](https://github.com/holland202/eace) — the method behind `tools/verifier_mutants.py`
 - [evidence-ledger](https://github.com/holland202/evidence-ledger) — the evidence-state vocabulary
 - [vacuity_lint.py](https://github.com/holland202/vacuity_lint.py) — run in CI, pinned
+- [veritas-companion](https://github.com/holland202/veritas-companion) — upstream proposal layer; its
+  actions are verified here (`tools/companion_action.py`), and its C005 bridge calls this verifier
 
 Nothing else is merged in. Each of those has its own status and tests.
 
