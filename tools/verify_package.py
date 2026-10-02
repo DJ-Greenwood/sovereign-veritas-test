@@ -37,6 +37,44 @@ class WitnessUnreadable(Exception):
     """The witness log is missing or malformed: freshness could not be judged at all."""
 
 
+# Nesting limit for every JSON document the verifier parses. Before 2026-10-02 the limit was whatever
+# the platform's C stack allowed: on macOS + Python 3.14 a 100000-deep value parsed and the verdict was
+# "checks failed" (exit 1), elsewhere RecursionError gave COULD NOT LOOK (exit 2). Same bytes, two
+# verdicts. The limit is now part of the verifier, not of the platform. Genuine packages nest to depth 7.
+MAX_JSON_DEPTH = 64
+
+
+def json_depth(text):
+    """Deepest [ / { nesting in a JSON text, ignoring brackets inside strings. Iterative: no recursion."""
+    depth = deepest = 0
+    in_str = esc = False
+    for ch in text:
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch in "[{":
+            depth += 1
+            if depth > deepest:
+                deepest = depth
+        elif ch in "]}":
+            depth -= 1
+    return deepest
+
+
+def loads_bounded(text):
+    """json.loads with a platform-independent nesting limit; deeper input raises ValueError."""
+    d = json_depth(text)
+    if d > MAX_JSON_DEPTH:
+        raise ValueError(f"JSON nesting depth {d} exceeds the verifier limit {MAX_JSON_DEPTH}")
+    return json.loads(text)
+
+
 def read_witness_log(path):
     """Read a canonical witness log.
 
@@ -529,7 +567,7 @@ def model_check(task, raw):
 def recompute_model_answer(m, artifact):
     """The recorded output_sha256 if the task, the raw reply and the check all recompute; else why not."""
     try:
-        task = json.loads(artifact.decode("utf-8"))["task"]
+        task = loads_bounded(artifact.decode("utf-8"))["task"]
     except (ValueError, KeyError, TypeError):
         return "the artifact is not a model task"
     if not (isinstance(task, dict) and task.get("op") == "mul"
@@ -573,7 +611,7 @@ def companion_check(rec):
 def recompute_companion(m, artifact):
     """The recorded output_sha256 if the record and the check recompute; else why not."""
     try:
-        doc = json.loads(artifact.decode("utf-8"))
+        doc = loads_bounded(artifact.decode("utf-8"))
         ok = doc["schema"] == COMPANION_SCHEMA and isinstance(doc["record"], dict)
     except (ValueError, KeyError, TypeError):
         ok = False
@@ -682,7 +720,7 @@ def vehicle_check(req, snap):
 def recompute_vehicle(m, artifact):
     """The recorded output_sha256 if the request, the snapshot and the check all recompute; else why not."""
     try:
-        req = json.loads(artifact.decode("utf-8"))
+        req = loads_bounded(artifact.decode("utf-8"))
         ok = req["schema"] == VEHICLE_SCHEMA and isinstance(req["action"], str)
     except (ValueError, KeyError, TypeError):
         ok = False
@@ -868,7 +906,7 @@ def verify(pkg, allow_recorded_only=False):
 
     if m.get("kind") == "companion_route_check":
         try:
-            crec = json.loads(artifact.decode("utf-8")).get("record")
+            crec = loads_bounded(artifact.decode("utf-8")).get("record")
         except (ValueError, AttributeError):
             crec = None
         crec = crec if isinstance(crec, dict) else {}
@@ -888,7 +926,7 @@ def verify(pkg, allow_recorded_only=False):
 
     if m.get("kind") == "vehicle_command_check":
         try:
-            req = json.loads(artifact.decode("utf-8"))
+            req = loads_bounded(artifact.decode("utf-8"))
         except ValueError:
             req = {}
         chk = m.get("check") if isinstance(m.get("check"), dict) else {}
@@ -972,7 +1010,7 @@ def main():
     try:
         with open(path, "rb") as fh:
             data = fh.read()
-        pkg = json.loads(data.decode("utf-8"))
+        pkg = loads_bounded(data.decode("utf-8"))
         if not isinstance(pkg, dict):
             raise ValueError(f"top level is {type(pkg).__name__}, not an object")
         checks = verify(pkg, allow_recorded_only=allow)
