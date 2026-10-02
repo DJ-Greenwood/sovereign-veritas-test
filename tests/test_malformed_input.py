@@ -94,3 +94,37 @@ def test_f5_huge_integer_in_vehicle_request_or_telemetry_fails_not_crashes(tmp_p
     assert vp.is_finite_number(10 ** 400) is False
     r = run(tmp_path, json.dumps(reseal(pkg)))
     assert r.returncode == 1 and "FAIL" in r.stdout
+
+
+# 2026-10-02: test_f3 failed on macOS + Python 3.14 only. That interpreter parsed the 100000-deep value
+# (no RecursionError), so the verdict depended on the platform's C stack. The verifier now enforces its
+# own depth limit (MAX_JSON_DEPTH). These cases sit far below any interpreter's recursion limit, so they
+# exercise the verifier's rule, not the platform's.
+@pytest.mark.parametrize("depth", [vp.MAX_JSON_DEPTH + 1, 200])
+def test_f3b_depth_over_verifier_limit_is_could_not_look_on_every_platform(tmp_path, depth):
+    deep = "[" * depth + "]" * depth
+    text = json.dumps(genuine())[:-1] + ',"x":' + deep + "}"
+    r = run(tmp_path, text)
+    assert r.returncode == 2 and r.stdout.startswith("COULD NOT LOOK"), r.stdout
+    assert "exceeds the verifier limit" in r.stdout
+
+
+def test_f3b_depth_at_limit_is_parsed_and_judged(tmp_path):
+    """Anti-vacuity: the limit must not refuse everything. Depth exactly at the limit parses; the extra
+    key breaks the package digest, so the verdict is an ordinary check failure (exit 1)."""
+    inner = vp.MAX_JSON_DEPTH - 1  # the package object itself is depth 1
+    text = json.dumps(genuine())[:-1] + ',"x":' + "[" * inner + "]" * inner + "}"
+    assert vp.json_depth(text) == vp.MAX_JSON_DEPTH
+    r = run(tmp_path, text)
+    assert r.returncode == 1 and "FAIL" in r.stdout, r.stdout
+
+
+def test_json_depth_ignores_brackets_inside_strings():
+    assert vp.json_depth('{"a": "[[[[{{{{", "b": "\\"]]]"}') == 1
+    assert vp.json_depth('[[1, [2]], {"k": [3]}]') == 3
+    assert vp.json_depth('"no containers"') == 0
+
+
+def test_genuine_packages_are_well_inside_the_limit():
+    for f in sorted(glob.glob(os.path.join(ROOT, "evidence", "sv_package_*.json"))):
+        assert vp.json_depth(open(f, encoding="utf-8").read()) <= 16, f
