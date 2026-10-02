@@ -11,6 +11,11 @@ His reported probe prompted the XB-1 investigation. The project independently re
 preregistered the experimental cases, and documented the resulting findings and limitations. Credit is
 for the observation; he has not reviewed or endorsed these results or any proposed fix.
 
+**Attribution correction (2026-10-02).** The PREREG's open-question line reads "Davorin / Sougata".
+The authority-revalidation question was raised by Davorin Popović. Sougata Roy's separate feedback, that
+authorization and justification are different questions, did not concern this boundary and is not a
+source of this experiment. The PREREG is left unedited because it is a frozen registration.
+
 ## Failures first
 
 At both `386716a` (the commit Davorin cited) and `794a86b` (main after PR #6), `EvidenceWorkflow.run()`
