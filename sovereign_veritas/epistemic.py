@@ -66,11 +66,17 @@ class AssessedEvidenceState:
     evidence_dependencies: list[str] = field(default_factory=list)  # what evidence was examined
 
     def __post_init__(self) -> None:
-        """Validate that assessed states have provenance."""
-        if self.state in (EvidenceState.SUPPORTED, EvidenceState.NOT_SUPPORTED, EvidenceState.REFUTED):
-            if not self.assessed_by:
+        """Validate that assessed states have provenance.
+
+        The state is coerced to EvidenceState first, so a plain or misspelled string cannot skip the
+        check (JG-1, F3). An unknown state raises ValueError.
+        """
+        state = EvidenceState(self.state)
+        object.__setattr__(self, "state", state)
+        if state in (EvidenceState.SUPPORTED, EvidenceState.NOT_SUPPORTED, EvidenceState.REFUTED):
+            if not (isinstance(self.assessed_by, str) and self.assessed_by.strip()):
                 raise ValueError(
-                    f"EvidenceState.{self.state.value} requires assessed_by to be non-empty"
+                    f"EvidenceState.{state.value} requires assessed_by to be non-empty"
                 )
 
 
@@ -85,6 +91,14 @@ class AssessedDomainReview:
     review_method: str | None = None  # e.g. "static_analysis", "expert_judgment"
     reviewed_at: str | None = None  # ISO 8601 timestamp
     assumptions_examined: list[str] = field(default_factory=list)  # which assumptions checked
+
+    def __post_init__(self) -> None:
+        """REVIEWED needs a reviewer (JG-1, F4). An unknown status raises ValueError."""
+        status = DomainReviewStatus(self.status)
+        object.__setattr__(self, "status", status)
+        if status is DomainReviewStatus.REVIEWED:
+            if not (isinstance(self.reviewed_by, str) and self.reviewed_by.strip()):
+                raise ValueError("DomainReviewStatus.REVIEWED requires reviewed_by to be non-empty")
 
 
 @dataclass(frozen=True)

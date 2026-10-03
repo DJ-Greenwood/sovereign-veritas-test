@@ -30,8 +30,39 @@ class CapabilityGovernor:
         actor: str = "external",
         metadata: dict[str, Any] | None = None,
     ) -> tuple[Capability | None, EvidenceRecord]:
-        """Record the authorization decision, then apply it to the registry."""
+        """Record the authorization decision, then apply it to the registry.
+
+        An unregistered capability is refused, and the record says so: it never records ALLOW
+        for an authorization that did not happen (JG-1, F2).
+        """
         before = self.registry.get(name)
+        if before is None:
+            meta = dict(metadata or {})
+            meta.update(
+                {
+                    "governance_action": "authorize",
+                    "capability_name": name,
+                    "actor": actor,
+                    "reason": reason,
+                    "prior_authorized": None,
+                }
+            )
+            evidence = EvidenceRecord(
+                record_id=record_id,
+                input_digest=input_digest,
+                verification={
+                    "status": "FAIL",
+                    "source": "capability_governor",
+                    "reason": "capability not registered",
+                },
+                capability=name,
+                decision="REFUSE",
+                reasons=(f"authorize_refused:{name}", "capability not registered", reason),
+                metadata=meta,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
+            self.sink.record(evidence)
+            return None, evidence
         meta = dict(metadata or {})
         meta.update(
             {

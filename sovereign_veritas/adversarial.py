@@ -106,19 +106,23 @@ class ResourcePolicy:
                 "constrained_branch_factor cannot exceed normal_branch_factor"
             )
 
+    # Exact vocabulary of evidence_states.py. Anything else (another case, an unknown word, None,
+    # a non-string) stops the search: missing means deny (JG-1, F1).
+    _THERMAL_LEVEL = {"critical": 0, "unsafe": 0, "unavailable": 0,
+                      "warning": 1, "high": 1, "hot": 1,
+                      "normal": 2, "cool": 2}
+    _BUDGET_LEVEL = {"exhausted": 0, "unavailable": 0,
+                     "constrained": 1, "low": 1,
+                     "available": 2}
+
     def branch_factor(self, thermal_status: str, compute_budget: str) -> int:
-        if thermal_status in {"critical", "unsafe", "unavailable"}:
+        thermal = self._THERMAL_LEVEL.get(thermal_status, 0) if isinstance(thermal_status, str) else 0
+        budget = self._BUDGET_LEVEL.get(compute_budget, 0) if isinstance(compute_budget, str) else 0
+        level = min(thermal, budget)
+        if level == 0:
             return 0
-
-        if compute_budget in {"exhausted", "unavailable"}:
-            return 0
-
-        if thermal_status in {"high", "warning"}:
+        if level == 1:
             return self.constrained_branch_factor
-
-        if compute_budget in {"constrained", "low"}:
-            return self.constrained_branch_factor
-
         return self.normal_branch_factor
 
 

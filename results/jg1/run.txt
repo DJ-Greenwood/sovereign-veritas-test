@@ -1,0 +1,18 @@
+HELD    P1  {"5/available": 0, "CRITICAL/available": 0, "None/None": 0, "bogus/available": 0, "cool/available": 4, "critical/available": 0, "high/available": 2, "hot/available": 2, "normal/EXHAUSTED": 0, "normal/available": 4, "normal/normal": 0, "warning/available": 2}
+HELD    P2  {"records": 2, "registered_authorized": true, "registered_decision": "ALLOW", "registry_has_unregistered": false, "unregistered_decision": "REFUSE", "unregistered_returns": "None", "unregistered_status": "FAIL"}
+HELD    P3  {"SUPPORTED_no_assessor": "raises ValueError", "SUPPORTED_with_assessor": "constructs SUPPORTED", "UNVERIFIED_no_assessor": "constructs UNVERIFIED", "supported": "raises ValueError"}
+HELD    P4  {"NOT_REVIEWED_no_reviewer": "constructs NOT_REVIEWED", "REVIEWED_no_reviewer": "raises ValueError", "REVIEWED_str_with_reviewer": "constructs REVIEWED", "unknown_status": "raises ValueError"}
+HELD    P5  {"ct_0.9": 0.7, "ct_1": 0.7, "ct_1.5": 0.5, "ct_True": 0.5, "ct_str": 0.5, "iv_finite": 0.7, "iv_inf": 0.5, "nc_0.12": 0.6, "nc_True": 0.5, "nc_inf": 0.5, "nc_nan": 0.5}
+VERDICT 5 of 5 as registered
+DIGEST f1ab40e043ef7753d16cbf9b44a2dbba03bd56fe40f97ba2d296ef3fbf0398b7
+RECORDED not pinned yet
+exit 0
+SABOTAGE: the five functions are replaced by their pre-fix behaviour
+REFUTED P1  {"5/available": 4, "CRITICAL/available": 4, "None/None": 4, "bogus/available": 4, "cool/available": 4, "critical/available": 0, "high/available": 2, "hot/available": 4, "normal/EXHAUSTED": 4, "normal/available": 4, "normal/normal": 4, "warning/available": 2}
+REFUTED P2  {"records": 2, "registered_authorized": true, "registered_decision": "ALLOW", "registry_has_unregistered": false, "unregistered_decision": "ALLOW", "unregistered_returns": "None", "unregistered_status": "PASS"}
+REFUTED P3  {"SUPPORTED_no_assessor": "raises AttributeError", "SUPPORTED_with_assessor": "constructs 'SUPPORTED'", "UNVERIFIED_no_assessor": "constructs UNVERIFIED", "supported": "constructs 'supported'"}
+REFUTED P4  {"NOT_REVIEWED_no_reviewer": "constructs NOT_REVIEWED", "REVIEWED_no_reviewer": "constructs REVIEWED", "REVIEWED_str_with_reviewer": "constructs 'REVIEWED'", "unknown_status": "constructs 'APPROVED'"}
+REFUTED P5  {"ct_0.9": 0.7, "ct_1": 0.7, "ct_1.5": 0.5, "ct_True": 0.7, "ct_str": 0.7, "iv_finite": 0.7, "iv_inf": 0.7, "nc_0.12": 0.6, "nc_True": 0.6, "nc_inf": 0.6, "nc_nan": 0.5}
+VERDICT 0 of 5 as registered
+DIGEST 465651cc205c44c141bc99153e880aa913d1dc2d9eb263ce10e512795f01a313
+sabotage exit 1
