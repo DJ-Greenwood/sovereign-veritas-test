@@ -1,0 +1,24 @@
+V15 recovery admissibility | constructed inputs, no vehicle | registered in docs/V15_RECOVERY_PREREG.md
+case P0 rtl                P0 land_hold          P1 rtl                P1 land_hold          P2 rtl                P2 land_hold          table
+0    ALLOW                 ALLOW                 ALLOW                 ALLOW                 ALLOW                 ALLOW                 ALLOW
+1    REFUSE                ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+2    REFUSE                ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+3    ALLOW                 ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+4    ALLOW                 ALLOW                 REFUSE                REFUSE                ALLOW                 ALLOW                 REFUSE
+5    ALLOW                 ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+6    REFUSE                ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+7    REFUSE                ALLOW                 REFUSE                REFUSE                REFUSE                REFUSE                REFUSE
+3f   ALLOW                 ALLOW                 ALLOW                 ALLOW                 REFUSE                REFUSE                REFUSE
+4f   ALLOW                 ALLOW                 ALLOW                 ALLOW                 ALLOW                 ALLOW                 REFUSE
+5f   ALLOW                 ALLOW                 ALLOW                 ALLOW                 REFUSE                REFUSE                REFUSE
+HELD     V15a P0 rtl: ALLOW 0,3,4,5; REFUSE 1,2,6,7; 7 for disagreement; forged = honest      rtl {'0': 'ALLOW', '1': 'REFUSE', '2': 'REFUSE', '3': 'ALLOW', '4': 'ALLOW', '5': 'ALLOW', '6': 'REFUSE', '7': 'REFUSE', '3f': 'ALLOW', '4f': 'ALLOW', '5f': 'ALLOW'}; unjustified ['3/rtl', '4/rtl', '5/rtl']
+HELD     V15b P0 land ALLOW in all 8; land_nohold not expressible                             unjustified land_hold ['1/land_hold', '2/land_hold', '3/land_hold', '4/land_hold', '5/land_hold', '6/land_hold', '7/land_hold']
+HELD     V15c case 2: goto REFUSE (disagreement), land ALLOW on the same snapshot             goto REFUSE (autopilot and independent position disagree by 62.), land ALLOW
+HELD     V15d P0 cases 1 and 6 decide identically on every action                             1 ['REFUSE', 'REFUSE', 'ALLOW', 'NOT EXPRESSIBLE'] 6 ['REFUSE', 'REFUSE', 'ALLOW', 'NOT EXPRESSIBLE']
+HELD     V15e P1 honest = table (32/32); forged rtl ALLOW in 3f, 4f, 5f                       honest mismatches []; forged ALLOW ['3f', '4f', '5f']
+HELD     V15f P2 rtl REFUSE 3,3f,5,5f; ALLOW 4,4f; only 4/4f off the table                    off table ['4/goto', '4/land_hold', '4/rtl', '4f/goto', '4f/land_hold', '4f/rtl']
+HELD     V15g land package references the goto it follows: 0                                  {"goto_decision": "ALLOW", "land_decision": "ALLOW", "references_found": 0, "checked": ["artifact_sha256", "output_sha256", "package_md5"]}
+HELD     V15h P2 refuses healthy A in 6,7 (rtl, land_hold): 4 of 4; land_nohold ALLOW         refused 4
+VERDICT  8 of 8 as registered
+DIGEST   5457298bd89ac2b16068e4713aa61109c53a1560335b5dcfbee45f92b3e2de9f
+RECORDED none yet: first run
