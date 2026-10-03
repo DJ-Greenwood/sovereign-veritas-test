@@ -89,3 +89,12 @@ yet.** Each needs its own registration before any code.
 - The check of its factual claims, the disagreements and the test-plan mapping are Claude
   (Opus 5.5)'s.
 - The summary record and the decision to keep the critique intact are Chad Holland's.
+
+## Results so far
+
+- **Attacks 4 and 2: `docs/PX_RESULTS.md`, 9 of 9 as registered.**
+  - Attack 4 is partly upheld. Accountability comes from replaying a decision, not from reading it: a
+    REFUSE's listed reason is not enough to reach ALLOW in 98.94 % of contract vectors.
+  - Attack 2 is upheld for the altitude floor. A change to a hard-coded rule leaves no trace in the
+    package, and a verifier updated by the same author passes it.
+- **Attacks 1 and 8 are not yet registered.**
