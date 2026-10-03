@@ -433,3 +433,10 @@ results will go in `docs/V14_CORRIDOR_RESULTS.md`.
 (`docs/V14_CORRIDOR_RESULTS.md`). After the ALLOW, today's request-time check bounds nothing. The same
 check re-run on every reading bounds the breach at about 31 m, given an independent source and a LAND
 that does not navigate by GNSS.
+
+## V15 (registered 2026-10-02, before any code for it)
+
+When A (GNSS) is untrustworthy, can a recovery decision stay admissible if the second source B is
+unavailable, stale, replayed or derived from A? The question comes from Amos Tipton's A/B Recovery
+Challenge. V15 is software decisions on constructed inputs, with no physical claim. Registered in
+`docs/V15_RECOVERY_PREREG.md`.
