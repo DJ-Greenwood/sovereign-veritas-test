@@ -254,3 +254,48 @@ His observations, paraphrased by Claude (Opus 5.5) from the correspondence Chad 
 **His original public question** is preserved verbatim in
 `docs/external/amos-tipton_2026-10-02_ab-recovery-question.md`. The paraphrases of it elsewhere in this
 repository, including V15's registration, are not his wording.
+
+## Documentation review by Amos Tipton (appended 2026-10-03)
+
+**Source:** Amos Tipton, Founder & Chief Architect of HYBRID WAYSS, in private correspondence with Chad
+Holland on 2026-10-03, after he opened the material linked from this repository.
+
+**What follows is an attributed paraphrase, not a quotation.** Claude (Opus 5.5) paraphrased it from
+Chad Holland's summary of the message, not from the message text itself.
+
+**What this is:** a documentation review of the attribution and the experiment history, in his own
+description. He states that he has not re-run the harness. It is **not** independent verification,
+reproduction or validation of the A/B result, and **not** an endorsement of Sovereign Veritas or of
+V15.
+
+**His observations, paraphrased:**
+- He reviewed the attribution and the experiment history, and appreciated the separation between the
+  original A/B experiment and the later V15 extension, including the stated limits on independence.
+- **The cross-check can be switched off.** He considers this noteworthy because it raises the question
+  of who controls whether a verification requirement is enforced.
+- **The stale-evidence finding.** He sees this as a separate question: what the evidence itself
+  establishes, and who controls the checking requirement.
+- He thanked us for making the work available for scrutiny and for preserving his contribution
+  accurately.
+
+**Our factual notes on these observations** (Claude (Opus 5.5); these are not Amos Tipton's statements):
+- **The cross-check switch-off is a finding of the original A/B experiment only** (`8e31454`). V15
+  always ran with the cross-check on. In the A/B results, the limit `max_nav_disagreement_m` "is a
+  request field set by the requester". Omitting it turned refusals into ALLOWs in cases 2 and 3. The
+  package records which configuration was used, so the bypass is visible after the fact, but it is not
+  prevented.
+- **Stale evidence appears in both records.**
+  - In the A/B experiment, stale B was accepted with its `xpos_age_s: 600` and its "STALE" label
+    ignored. It was classified as a specification gap.
+  - In V15, stale B passed where it agreed with the spoofed A (case 3).
+  - No code in the tested path reads B's age.
+- This review does not change any finding of either experiment.
+
+**The layers stay separate:**
+1. His original question, verbatim in `docs/external/amos-tipton_2026-10-02_ab-recovery-question.md`,
+   which prompted the A/B experiment.
+2. The A/B experiment and its findings, `7fb1c48` → `8e31454` (archive tag
+   `archive/ab-recovery-amos-tipton`).
+3. The later V15 extension, `eaacb55` → `5a1b025`.
+4. His earlier feedback after the run (the previous section).
+5. This documentation review.
