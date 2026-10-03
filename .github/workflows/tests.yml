@@ -38,6 +38,8 @@ jobs:
           python tools/verify_package.py "$f"
       - name: V14 corridor - registered outcome reproduced on every platform (docs/V14_CORRIDOR_RESULTS.md)
         run: python tools/corridor_challenge.py | tail -4
+      - name: V15 recovery admissibility - registered outcome reproduced (docs/V15_RECOVERY_RESULTS.md)
+        run: python tools/recovery_admissibility.py | tail -3
 
   port-go:
     # C6 (docs/GATE_CONTRACT.md): the Go port of sv.gate/0 must reproduce the conformance digest.
@@ -91,6 +93,11 @@ jobs:
         run: |
           python tools/corridor_challenge.py --attacker "python tools/corridor_attacker_example.py" | tee v14_ext.txt
           grep -q "VERDICT  NO BREAK: max breach 30.9500 m" v14_ext.txt
+      - name: V15 can fail (--sabotage removes P2's nonce check -> exit 1)
+        run: |
+          set +e; python tools/recovery_admissibility.py --sabotage > v15_sab.txt; rc=$?; set -e
+          tail -3 v15_sab.txt
+          test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
       - name: Fetch vacuity_lint, pinned
         run: |
           git clone -q https://github.com/holland202/vacuity_lint.py "$RUNNER_TEMP/vl"
