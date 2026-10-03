@@ -440,3 +440,9 @@ When A (GNSS) is untrustworthy, can a recovery decision stay admissible if the s
 unavailable, stale, replayed or derived from A? The question comes from Amos Tipton's A/B Recovery
 Challenge. V15 is software decisions on constructed inputs, with no physical claim. Registered in
 `docs/V15_RECOVERY_PREREG.md`.
+
+**V15 result (2026-10-02):** 8 of 8 as registered, on constructed inputs with no vehicle
+(`docs/V15_RECOVERY_RESULTS.md`). One correction: V15b's stated count was wrong (7, not 5). Today's
+Gate allows `land` on the same snapshot that refuses `goto`. It accepts any second source that agrees
+with A: stale, replayed or derived. A Gate nonce stops stale and replayed sources; nothing tested
+stops a derived one.

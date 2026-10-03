@@ -1,0 +1,553 @@
+{
+ "digest": "5457298bd89ac2b16068e4713aa61109c53a1560335b5dcfbee45f92b3e2de9f",
+ "held": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "table": {
+  "P0/0/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/0/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/0/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/0/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/1/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P0/1/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/1/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/1/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P0/2/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P0/2/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/2/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/2/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P0/3/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/3/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/3/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/3/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/3f/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/3f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/3f/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/3f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/4/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/4/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/4/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/4/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/4f/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/4f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/4f/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/4f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/5/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/5/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/5/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/5/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/5f/goto": {
+   "decision": "ALLOW",
+   "why": "all goto rules hold"
+  },
+  "P0/5f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/5f/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/5f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rtl rules hold"
+  },
+  "P0/6/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P0/6/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/6/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/6/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P0/7/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m"
+  },
+  "P0/7/land_hold": {
+   "decision": "ALLOW",
+   "why": "all land rules hold"
+  },
+  "P0/7/land_nohold": {
+   "decision": "NOT EXPRESSIBLE",
+   "why": "P0's request schema has no descent without position hold"
+  },
+  "P0/7/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m"
+  },
+  "P1/0/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/0/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/0/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/0/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/1/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/1/land_hold": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/1/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/1/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/2/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P1/2/land_hold": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P1/2/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/2/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P1/3/goto": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/3/land_hold": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/3/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/3/rtl": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/3f/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/3f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/3f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/3f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/4/goto": {
+   "decision": "REFUSE",
+   "why": "declared B root gnss-derived"
+  },
+  "P1/4/land_hold": {
+   "decision": "REFUSE",
+   "why": "declared B root gnss-derived"
+  },
+  "P1/4/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/4/rtl": {
+   "decision": "REFUSE",
+   "why": "declared B root gnss-derived"
+  },
+  "P1/4f/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/4f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/4f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/4f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/5/goto": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/5/land_hold": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/5/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/5/rtl": {
+   "decision": "REFUSE",
+   "why": "declared B age 30.0 s > 2.0 s"
+  },
+  "P1/5f/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/5f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/5f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/5f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P1/6/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/6/land_hold": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/6/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/6/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P1/7/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; declared B age 30.0 s > 2.0 s"
+  },
+  "P1/7/land_hold": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; declared B age 30.0 s > 2.0 s"
+  },
+  "P1/7/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P1/7/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; declared B age 30.0 s > 2.0 s"
+  },
+  "P2/0/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/0/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/0/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/0/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/1/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/1/land_hold": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/1/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/1/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/2/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P2/2/land_hold": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P2/2/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/2/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 62.0 m > 25.0 m"
+  },
+  "P2/3/goto": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/3/land_hold": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/3/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/3/rtl": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/3f/goto": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/3f/land_hold": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/3f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/3f/rtl": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/4/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/4/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/4/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/4/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/4f/goto": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/4f/land_hold": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/4f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/4f/rtl": {
+   "decision": "ALLOW",
+   "why": "all rules hold"
+  },
+  "P2/5/goto": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/5/land_hold": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/5/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/5/rtl": {
+   "decision": "REFUSE",
+   "why": "B message does not echo this decision's nonce"
+  },
+  "P2/5f/goto": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/5f/land_hold": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/5f/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/5f/rtl": {
+   "decision": "REFUSE",
+   "why": "B message MAC invalid; B message does not echo this decision's nonce"
+  },
+  "P2/6/goto": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/6/land_hold": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/6/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/6/rtl": {
+   "decision": "REFUSE",
+   "why": "no independent position to cross-check"
+  },
+  "P2/7/goto": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; B message does not echo this decision's nonce"
+  },
+  "P2/7/land_hold": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; B message does not echo this decision's nonce"
+  },
+  "P2/7/land_nohold": {
+   "decision": "ALLOW",
+   "why": "no position source used"
+  },
+  "P2/7/rtl": {
+   "decision": "REFUSE",
+   "why": "autopilot and independent position disagree by 59.0 m > 25.0 m; B message does not echo this decision's nonce"
+  }
+ },
+ "v15g": {
+  "checked": [
+   "artifact_sha256",
+   "output_sha256",
+   "package_md5"
+  ],
+  "goto_decision": "ALLOW",
+  "land_decision": "ALLOW",
+  "references_found": 0
+ }
+}
