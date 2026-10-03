@@ -76,3 +76,11 @@ Nothing run on the S25/Termux (NOT VALIDATED there). Seams are simulated with fi
 Fix-and-rerun is a new registration: a write-ahead intent record for I-B/E4r, NaN rejection for U9. Registered predictions for those are not written yet.
 
 Provenance: harness and write-up Claude-assisted (Claude Sonnet 5.5); Chad has not reviewed the code line by line.
+
+## Correction appended 2026-10-03: three of these findings were already known (docs/XB2_RESULTS.md, README)
+Found after publication, while checking whether any published claim requires a fix. The text above is unchanged.
+- **I-B in E3/E4 and E4r (effect with no record, duplicate on restart)** is XB-2 cell C5 (2 effects after a crash) and the README's "effect-without-record case is open". Not new.
+- **I-C in E2 (record says FAILED after the effect)** is XB-2 P4 ("the honest label is UNKNOWN"). Not new.
+- **U9 (NaN uncertainty) is the only finding here not recorded elsewhere.** The same class was found in the package verifier (docs/NONFINITE_PROBE.md), not in the workflow.
+- XB-2 also measured the obvious fix for I-B: reservation before the effect (A2) trades duplicates for missing effects (C4: 0 effects, UNCONFIRMED). So F1 as registered is not free; it moves the failure from "duplicate" to "authorized action never done".
+My registration did not cite XB-2; the failure-injection pass re-derived these independently of it.
