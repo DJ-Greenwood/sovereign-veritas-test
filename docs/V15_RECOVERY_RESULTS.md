@@ -105,21 +105,122 @@ probe can fail.
 - **Independence (case 4)** is untouched by anything here. It needs architecture (separate roots
   verified by inspection), not more fields.
 
-## Prior registration of the same question (appended 2026-10-03)
+## Lineage of the Amos Tipton A/B recovery challenge (appended 2026-10-03)
 
-An earlier experiment on the same challenge question exists. It is not merged.
+There is **one question**: Amos Tipton's public A/B recovery question, preserved verbatim in
+`docs/external/amos-tipton_2026-10-02_ab-recovery-question.md`. Two records in this repository's
+history test it. They are **not** two independent tests.
 
-- **Branch:** `experiment/ab-recovery-amos-tipton`.
-- **Registration:** `7fb1c48`, committed 2026-10-02 20:14 −0500.
-- **Results:** `8e31454`, 12 of 12 as registered, run against unmodified code at `facadc2`.
+An earlier implementation of the same Amos Tipton A/B recovery challenge was registered at `7fb1c48`
+and completed at `8e31454`. It is preserved as provenance, but it is not treated as an independent
+replication. V15 (`eaacb55`) subsequently formalized and extended the same challenge, and V15 is the
+canonical public experiment and results record.
 
-V15's registration (`eaacb55`, 2026-10-02 21:03 −0500) was written **without knowledge of that branch**.
-The two experiments were designed independently by separate sessions. They use different case
-matrices, and their harnesses are separate: `tools/ab_recovery_challenge.py` there,
-`tools/recovery_admissibility.py` here.
+The lineage, in order:
+1. Amos Tipton's question (LinkedIn, 2026-10-02).
+2. The original A/B experiment, `7fb1c48` → `8e31454`.
+3. V15's registration, `eaacb55`.
+4. V15's results, `5a1b025`.
+5. Later external critique (the next section).
 
-Neither experiment's registration or results are changed by this note. Whether to merge that branch
-into `main` is undecided.
+**Where the original A/B experiment is kept.** Branch `experiment/ab-recovery-amos-tipton` is not
+merged. Its commits are kept reachable by the tag `archive/ab-recovery-amos-tipton`, which points at
+`8e31454`. Its documents are `docs/AB_RECOVERY_PREREG.md` and `docs/AB_RECOVERY_RESULTS.md` at that
+commit. Its harness is `tools/ab_recovery_challenge.py`, and its output is in `results/ab_recovery/`.
+
+### What Git establishes
+
+- **Registration** `7fb1c484f5641bbbf859101cf8d5a1dd9cb1fb2a`: committed 2026-10-02 20:14:21 −0500,
+  adding `docs/AB_RECOVERY_PREREG.md` only.
+- **Results** `8e314544b0c4192f22fed7fd4c29004b858a4c45`: committed 20:16:46 −0500, **2 min 25 s
+  later**. It adds the harness, its test, the results document and the run output.
+- **Who:** both commits carry the git author "Chad Holland", Claude co-author trailers, and Claude
+  session `session_011XCUcZGStMHUv3a3XziMCE`. V15's commits come from a different Claude session,
+  `session_01VjYFCynLEBStwNzA7sigYY`.
+- **What Git does not establish:**
+  - when the harness was written relative to the registration commit;
+  - when either commit was pushed.
+
+  Commit times show only that the registration was **committed** first.
+- **Reproducibility:** on 2026-10-03, the A/B harness re-run at `8e31454` printed
+  `VERDICT 12 of 12 as registered` and `DIGEST a06a43c285be84d87504fba8552489ec1956510f79954f7069fdd28752ca9d47`,
+  matching its recorded run. The Gate files it pins (`tools/vehicle_action.py`,
+  `sovereign_veritas/decision.py`, `sovereign_veritas/workflow.py`) are unchanged between `facadc2` and
+  `main` at `4eda7d4`.
+
+### What the original A/B experiment tested and found
+
+These are the A/B experiment's own findings, as recorded in its results at `8e31454`, summarized here.
+**They are not part of V15's result set, and they are not counted as additional evidence for V15.**
+
+**The setup:**
+- 9 cases, including 2g. Each was run with the cross-check on and off, against `goto`, `goto` back to
+  the fence centre, `rtl` and `land`.
+- The real `vehicle_check` and Gate, at `facadc2`.
+- Two controls: C0 checked the harness's wiring against `vehicle_action.py`'s `main()`; C2 refused to
+  run if the Gate files differed from `facadc2`.
+
+**The findings:**
+- **B unavailable versus B stale:**
+  - With the cross-check on, unavailable B gave REFUSE for `goto` and `rtl`.
+  - Stale B was ALLOWed. Its explicit `xpos_age_s: 600` field and a "STALE" source label were both
+    ignored. The stale fix was built to agree with the spoofed A.
+  - The A/B results classify this as a specification gap, not an implementation defect.
+- **The requester can turn the cross-check off.** Omitting `max_nav_disagreement_m` turned refusals
+  in cases 2 and 3 into ALLOWs: a fail-closed bypass by configuration. **This is unique to the A/B
+  experiment; V15 always ran with the cross-check on.**
+- **EKF GPS-glitch flag (case 2g):** `goto` and `rtl` were refused without needing B. **Unique to the
+  A/B experiment.**
+- **Full-snapshot replay (case 8):** a pre-spoof snapshot replayed as current was ALLOWed. **Unique to
+  the A/B experiment.** V15's case 5 replays only B's message.
+- **Refusal information collapses to `verification_not_passed`:** every refusal reached the Gate with
+  that single reason. The cause survives only in the check's text inside the package. **Unique to the
+  A/B experiment's write-up.**
+- **B derived from A** passed the cross-check under a spoof.
+- **Prior-approval invalidation was not testable.** No approval state is stored, so cases 5 and 6 were
+  byte-identical to 3 and 4, and were recorded as NOT TESTABLE.
+- **LAND:** `land` was ALLOWed in every case, with no position evidence, by design. Its dependence on
+  GNSS navigation in ArduCopter is the dependency-inheritance concern. The roughly 60 m figure comes
+  from V14's model, not from the A/B experiment.
+- **Same-author limitation:** one author wrote the A/B registration, harness and classification.
+
+### What was reported to Amos Tipton at the time
+
+Chad Holland's contemporaneous message to Amos Tipton reported the following. It is not quoted here.
+
+- The predictions and matrix were registered before the harness was written, and the registration
+  was "pushed before the harness".
+- The result was 12 of 12 as registered, not a "pass".
+- The findings were as listed above.
+
+That statement about ordering is the author's contemporaneous account. **The repository does not
+independently verify it.** Git establishes only the commit order and the 2 min 25 s gap above.
+
+The message's summary "B unavailable: … refused" holds for the cross-check-on configuration. With the
+cross-check off, the A/B results show unavailable B ALLOWed. Both appear in the A/B results.
+
+### How V15 relates
+
+- **V15 is a later formalization and extension of the same challenge. It is not an independent
+  replication.**
+- **V15's registration (`eaacb55`) was produced in a different Claude session, but session separation
+  does not establish independence of design.**
+  - The V15 case list came from the author at about 21:00, after the A/B results at 20:16.
+  - It includes derived-from-A and replay cases that were already present in the A/B experiment.
+  - Therefore, independence of V15's design from the A/B experiment is not established, and is not
+    claimed.
+- **V15 adds:**
+  - healthy-A controls;
+  - declared-label (P1) and authenticated (P2) policies, with forged variants;
+  - a landing without position hold;
+  - an admissibility table;
+  - a check of the package link between a recovery and the approval before it;
+  - a CI-pinned outcome with a sabotage check.
+- **The A/B experiment tested things V15 did not:**
+  - the cross-check switched off;
+  - the EKF glitch flag;
+  - full-snapshot replay;
+  - the C0 wiring control.
 
 ## External critique after the run (appended 2026-10-03)
 
