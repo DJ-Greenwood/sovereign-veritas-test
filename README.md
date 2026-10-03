@@ -48,6 +48,12 @@ independent reimplementations of the Gate that reproduce the contract digest.
 - **"PASS" and "authorized" are labels the caller writes.** An external review filed eleven breaks
   ([issue #4](https://github.com/holland202/sovereign-veritas/issues/4)). Two are fixed; the rest are
   assigned to `sv.gate/1`.
+- **The Gate collapses some reasons for insufficient evidence** (EP-0, EP-1:
+  [docs/EP1_RESULTS.md](docs/EP1_RESULTS.md)). "Verifier failed", "never verified" and "unreadable verifier
+  output" give one REFUSE reason; "missing", "inaccessible", "never searched" and "out of scope" give one DEFER
+  reason. All fail closed. Under a declared world model, only "never searched" changes an outcome (a caller that
+  cannot see it retries instead of searching). A missing runtime value REFUSEs while a missing evidence item
+  DEFERs. The `epistemic.py` vocabulary is not read by the Gate.
 - **No second, independent implementation exists yet.** The kernel and the verifier agree on all 4690
   vectors, but both were written by one author.
 
