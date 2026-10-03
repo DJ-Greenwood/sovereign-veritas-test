@@ -20,3 +20,8 @@ jobs:
       - name: FI sabotage must exit 1
         run: |
           if python tools/fault_injection.py --sabotage > /dev/null; then echo "sabotage passed: instrument is vacuous"; exit 1; fi
+      - name: F3 probe reproduces the recorded outcome
+        run: python tools/fi_f3_probe.py
+      - name: F3 probe sabotage must exit 1
+        run: |
+          if python tools/fi_f3_probe.py --sabotage > /dev/null; then echo "sabotage passed: probe is vacuous"; exit 1; fi

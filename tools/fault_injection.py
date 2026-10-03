@@ -40,8 +40,13 @@ from sovereign_veritas.workflow import EvidenceWorkflow  # noqa: E402
 if HAVE_FCNTL:
     from sovereign_veritas.anchored_file_ledger import AnchoredFileLedger  # noqa: E402
 
-RECORDED = ((False, False, True, True, True, True, True, False, True),
-            "ac3b30e493d74b44f5d4b4b03d7622f0836186c080ddfada6addddef81123127")  # pinned after the scored run: 6 of 9 held
+# Pre-F3 pin (PR #23, commit df55508): FI-1, FI-2, FI-8 refuted. Kept as the record of the unfixed tree; this file is
+# not re-run against that tree any more.
+RECORDED_PRE_F3 = ((False, False, True, True, True, True, True, False, True),
+                   "ac3b30e493d74b44f5d4b4b03d7622f0836186c080ddfada6addddef81123127")
+# Post-F3 pin (this branch): FI-2 and FI-8 now hold as originally registered; FI-1 stays refuted (wrong U0 tuple).
+RECORDED = ((False, True, True, True, True, True, True, True, True),
+            "c77d529fa91ff00737e4ede58e189ec6695e2f9b143b1ea61f9e18e2c9062057")
 
 # --------------------------------------------------------------------------- registered predictions
 # (effects, records after reload, outcome, recorded decision / status note)
