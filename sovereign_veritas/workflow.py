@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -79,6 +80,16 @@ class EvidenceWorkflow:
 
         observation = self.sensor.observe()
         prediction = self.predictor.predict(observation)
+
+        # FI-FIX F3 (docs/FI_FIX_PREREG.md; finding U9 in docs/FI_RESULTS.md): a NaN or infinite uncertainty
+        # was allowed through and the action executed. Refuse before the gate and before any effect.
+        uncertainty = prediction.uncertainty
+        if (
+            isinstance(uncertainty, (int, float))
+            and not isinstance(uncertainty, bool)
+            and not math.isfinite(uncertainty)
+        ):
+            raise ValueError(f"non-finite prediction uncertainty refused before execution: {uncertainty!r}")
 
         adversarial = None
         if self.adversary is not None:
