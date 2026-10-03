@@ -104,3 +104,52 @@ probe can fail.
   2. Can a descent without horizontal position hold be commanded at all through MAVLink?
 - **Independence (case 4)** is untouched by anything here. It needs architecture (separate roots
   verified by inspection), not more fields.
+
+## Prior registration of the same question (appended 2026-10-03)
+
+An earlier experiment on the same challenge question exists. It is not merged.
+
+- **Branch:** `experiment/ab-recovery-amos-tipton`.
+- **Registration:** `7fb1c48`, committed 2026-10-02 20:14 −0500.
+- **Results:** `8e31454`, 12 of 12 as registered, run against unmodified code at `facadc2`.
+
+V15's registration (`eaacb55`, 2026-10-02 21:03 −0500) was written **without knowledge of that branch**.
+The two experiments were designed independently by separate sessions. They use different case
+matrices, and their harnesses are separate: `tools/ab_recovery_challenge.py` there,
+`tools/recovery_admissibility.py` here.
+
+Neither experiment's registration or results are changed by this note. Whether to merge that branch
+into `main` is undecided.
+
+## External critique after the run (appended 2026-10-03)
+
+**Source:** Amos Tipton, Founder & Chief Architect of HYBRID WAYSS, in private correspondence with Chad
+Holland on 2026-10-03 after the results were published.
+
+**What follows is an attributed paraphrase, not a quotation.** It does not imply that Amos Tipton or
+HYBRID WAYSS endorses, validates or has independently verified this experiment or its results.
+
+His observations, paraphrased by Claude (Opus 5.5) from the correspondence Chad Holland shared:
+
+- **Unavailable versus stale.** The presence of second-source evidence was sufficient for the decision
+  even when its age should have been part of it.
+- **Specification gap versus implementation bug.** He considers this distinction important for reading
+  the results.
+- **LAND recovery.** The LAND finding addresses the recovery question directly: what evidence
+  justifies a recovery action when that action still depends on the source already considered
+  untrustworthy?
+
+**Our factual notes on these observations** (Claude (Opus 5.5); these are not Amos Tipton's statements):
+
+- **Stale B.** In V15, stale B passed only where its value agreed with the spoofed A (case 3). Where the
+  stale value disagreed (case 7), it was refused, but for the disagreement, not for its age.
+- **No age concept.** No code in the tested path reads B's age. The earlier branch above shows the same
+  thing with an explicit `xpos_age_s: 600` that is ignored. Its stale case was also built to agree
+  with the spoofed A.
+- **Classification.** The earlier branch classifies the stale-B result as a specification gap, not an
+  implementation defect. V15 found the same absence ("P0 has no staleness concept"). The Gate
+  contract asks for no freshness of B.
+
+**His original public question** is preserved verbatim in
+`docs/external/amos-tipton_2026-10-02_ab-recovery-question.md`. The paraphrases of it elsewhere in this
+repository, including V15's registration, are not his wording.
