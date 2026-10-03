@@ -62,3 +62,19 @@ This shows what is collapsed, not that collapsing is wrong: every collapsed case
 Is there a registered case where telling "inaccessible" or "unsearched" apart from "missing" should change the
 decision (for example DEFER-and-retry vs REFUSE)? If one exists, that is EP-1. If none, the collapse is a
 documented simplification, not a defect.
+
+## Addendum 2026-10-03: two more Copilot messages and two more ChatGPT dispositions
+Stored verbatim in `docs/external/`:
+
+| File | Author | sha256 |
+|---|---|---|
+| `copilot_2026-10-03_worth_pursuing.md` | Copilot | `c1ab3ecdac47c27da1426b01188270c0ddf11eb0b1e764e34455dbac28809819` |
+| `copilot_2026-10-03_next_move.md` | Copilot | `e6ed3f965849a7103392a25db6f78c1240d7904dad2457ee063081a708f7bda7` |
+| `chatgpt_2026-10-03_novelty_disposition.md` | ChatGPT | `d8729af33b4bdd5bcd5382d3ff86dac646fc202391c8cc3a44c488ae39bc4b30` |
+| `chatgpt_2026-10-03_ep1_proposal.md` | ChatGPT | `97f7ebb24c1172ffc0d60e8ee24335a897b01b9a7d3d638e4a0fa90e98eaecba` |
+
+- **Copilot's novelty claims are unverified and are not adopted:** "almost nobody is working on that", "the seed of a new field", "no existing assurance system can do". These are prior-art claims with no search behind them.
+  Stated precisely, "the generator cannot influence which evidence is selected" is an information-flow (noninterference) property, a field with prior work; whether it has been applied to evidence selection for AI actions is UNDECIDED pending a literature search.
+- **ChatGPT's EP-1 was already run, in another repo.** evidence-ledger's EL-007 (merged 2026-10-02) tests generator-controlled vs separated evidence selection: favourable-only search, suppression, fabricated citations, biased vocabulary, one authorized channel (S1L), and the closed-world trap (P10). 10 of 11 as registered; P3 refuted and kept. Neither AI knew it existed.
+- **Its unrun door D1 was run on 2026-10-03** (evidence-ledger PR #4): when the claim key is derived from the generator's wording, an unknown paraphrase turns all 475 refutations into UNRESOLVED, and a generator-named key turns 751 claims SUPPORTED. 6 of 7 as registered; Q4 refuted (kept).
+- **Still not tested anywhere:** inaccessible, never-searched and outside-domain evidence, the cases EP-0 shows the SV Gate collapses. EL-007 is not wired into SV's Gate.
