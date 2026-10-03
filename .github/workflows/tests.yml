@@ -104,6 +104,13 @@ jobs:
           set +e; python tools/px_probe.py --sabotage > px_sab.txt; rc=$?; set -e
           tail -3 px_sab.txt
           test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
+      - name: JG-1 (James Greenwood's five findings) - registered outcome reproduced (docs/JG1_PREREG.md)
+        run: python tools/jg1_probe.py | tail -3
+      - name: JG-1 probe can fail (--sabotage restores the pre-fix behaviour -> exit 1)
+        run: |
+          set +e; python tools/jg1_probe.py --sabotage > jg1_sab.txt; rc=$?; set -e
+          tail -3 jg1_sab.txt
+          test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
       - name: Fetch vacuity_lint, pinned
         run: |
           git clone -q https://github.com/holland202/vacuity_lint.py "$RUNNER_TEMP/vl"

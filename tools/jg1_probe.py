@@ -23,7 +23,8 @@ from sovereign_veritas.epistemic import (  # noqa: E402
     AssessedDomainReview, AssessedEvidenceState, DomainReviewStatus, EvidenceState)
 from sovereign_veritas.governance import CapabilityGovernor  # noqa: E402
 
-RECORDED = None  # pinned after the first run, in a separate commit (WORKFLOW W4)
+RECORDED = ((True, True, True, True, True),
+            "f1ab40e043ef7753d16cbf9b44a2dbba03bd56fe40f97ba2d296ef3fbf0398b7")  # pinned from results/jg1/run.txt
 
 
 # ------------------------------------------------------------------ sabotage: pre-fix behaviour
