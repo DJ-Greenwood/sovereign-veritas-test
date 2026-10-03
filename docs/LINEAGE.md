@@ -50,6 +50,7 @@ their own.
 | Nicholas Kouns' breaks shaped fixes `2902a2c`, B4/B11 | issues #4 and #5, `docs/ISSUE_4_RESPONSE.md`, `docs/ISSUE_5_RESPONSE.md` | **SUPPORTED** |
 | eace's mutation method shaped `tools/verifier_mutants.py` | `docs/INTEGRATION.md`, eace `1991750` | **SUPPORTED** (same author) |
 | evidence-ledger's vocabulary shaped `evidence_states` | `docs/INTEGRATION.md`, evidence-ledger `ccf9144` | **SUPPORTED** (same author) |
+| The "Dependent Evidence" proposal shaped V14 | the proposal text, critiqued in `docs/V14_CORRIDOR_PREREG.md`; concept Chad Holland's by his account; drafter of the text not recovered | **INDETERMINATE** as to who drafted the text; see `docs/V14_CORRIDOR_RESULTS.md`, provenance correction |
 | Sougata Roy shaped XB-1 | the XB-1 PREREG once named "Davorin / Sougata" | **NOT SUPPORTED** — corrected in `docs/EXECUTION_BOUNDARY_RESULTS.md`; his authorized-vs-justified feedback is separate and not yet the basis of any experiment here |
 
 ## Outbound: systems this work is claimed to have shaped

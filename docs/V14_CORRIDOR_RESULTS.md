@@ -115,3 +115,19 @@ as OUT OF MODEL. These rejections are pinned in `tests/test_corridor_challenge.p
 - Neither can run here: there is no SITL build in this container.
 
 The challenge is published in `CHALLENGE.md` ("Corroboration corridor").
+
+## Provenance correction (2026-10-02, after the run)
+
+The registration credits "the author's proposal 'Dependent Evidence'". That is too categorical, and the
+registration is left as written. What is established:
+
+- **The concept** (attacking the evidence dependency, not the computation) is Chad Holland's, by his account.
+- **Who drafted the proposal text** that was pasted into the session is **not established**. It may have
+  been drafted with an AI system; Perplexity has been suggested but is unconfirmed. It stays unattributed
+  until the original document is recovered.
+- **V14 itself**: the critique of the proposal, the registration, the harness and the run are Claude
+  (Opus 5.5)'s.
+- **Not related:** Amos Tipton's A/B Recovery Challenge came after V14 was published, in a discussion of
+  this track. It is not the source of the proposal. V14f, registered before his challenge, covers one
+  case: a recovery action that inherits the failed source. His separate cases, where the recovery source B
+  is unavailable or B is stale, are not tested here.
