@@ -1,6 +1,15 @@
 from __future__ import annotations
 
+import math
 from typing import Any
+
+
+def _real(x: Any) -> float | None:
+    """A finite int or float (never bool or str), else None (JG-1, F5)."""
+    if isinstance(x, bool) or not isinstance(x, (int, float)):
+        return None
+    v = float(x)
+    return v if math.isfinite(v) else None
 
 
 def normalize_uncertainty(
@@ -39,26 +48,14 @@ def normalize_uncertainty(
 
     quality = 0.5
     if interval is not None and len(interval) >= 2:
-        try:
-            lo, hi = float(interval[0]), float(interval[1])
-            if lo <= hi and all(map(lambda x: x == x, (lo, hi))):  # finite
-                quality += 0.2
-        except (TypeError, ValueError):
-            pass
-    if coverage_target is not None:
-        try:
-            ct = float(coverage_target)
-            if 0.0 < ct <= 1.0:
-                quality += 0.2
-        except (TypeError, ValueError):
-            pass
-    if nonconformity is not None:
-        try:
-            nc = float(nonconformity)
-            if nc == nc:  # finite
-                quality += 0.1
-        except (TypeError, ValueError):
-            pass
+        lo, hi = _real(interval[0]), _real(interval[1])
+        if lo is not None and hi is not None and lo <= hi:
+            quality += 0.2
+    ct = _real(coverage_target)
+    if ct is not None and 0.0 < ct <= 1.0:
+        quality += 0.2
+    if _real(nonconformity) is not None:
+        quality += 0.1
 
     quality = max(0.0, min(1.0, quality))
     return uncertainty, quality
