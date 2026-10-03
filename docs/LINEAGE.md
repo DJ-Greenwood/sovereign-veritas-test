@@ -53,6 +53,7 @@ their own.
 | The "Dependent Evidence" proposal shaped V14 | the proposal text, critiqued in `docs/V14_CORRIDOR_PREREG.md`; concept Chad Holland's by his account; drafter of the text not recovered | **INDETERMINATE** as to who drafted the text; see `docs/V14_CORRIDOR_RESULTS.md`, provenance correction |
 | Perplexity's external analyses (2026-10-02) shaped the attack-surface test plan | the three texts verbatim in `docs/external/`, with hashes; `docs/EXTERNAL_CRITIQUE_PERPLEXITY.md` | **SUPPORTED** as to authorship and influence on the plan; Perplexity's own claims are checked row by row there, not adopted |
 | Sougata Roy shaped XB-1 | the XB-1 PREREG once named "Davorin / Sougata" | **NOT SUPPORTED** — corrected in `docs/EXECUTION_BOUNDARY_RESULTS.md`; his authorized-vs-justified feedback is separate and not yet the basis of any experiment here |
+| James Greenwood's audit (2026-10-03, with Gemini) found the five input-handling defects fixed in JG-1 | his report, verbatim with sha256, in `docs/external/greenwood_2026-10-03_challenge-and-audit-report.md`; the JG-1 registration (`8a1f06e`) reproduces each finding on unmodified `main` before any fix | **SUPPORTED**, for the five findings only. The report is AI-assisted (Gemini). The fixes, predictions and probe are this project's. No endorsement or validation by him, Gemini or Google is implied |
 
 ## Outbound: systems this work is claimed to have shaped
 
