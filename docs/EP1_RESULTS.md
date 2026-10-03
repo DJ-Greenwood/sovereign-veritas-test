@@ -8,8 +8,8 @@ Chad gave direction only. Self-tested; not independent review.
 - No prediction failed (7 of 7). **Most of this is by construction:** F3-F7 follow from the registered world model
   (inaccessible = transient, unsearched = fixed by one search, missing/out-of-scope = never fixable). Only F1 and
   F2 are observations of the real Gate. The model is an assumption, not a measurement of any sensor or search.
-- Sabotage (the generic caller is given the labels) refutes F4 and F5 and exits 1. F1 also fails under sabotage only
-  because the digest differs; F1 itself does not depend on the caller.
+- Sabotage (the generic caller is given the labels) refutes F4 and F5 and exits 1. F1-F3 and F6-F7 still hold under
+  sabotage; they do not depend on what the caller knows.
 
 ## Result
 ```
