@@ -1,0 +1,22 @@
+name: fault-injection
+on:
+  push:
+  pull_request:
+jobs:
+  fi:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[test]"
+      - name: FI harness reproduces the recorded outcome (exit 0 only on RECORDED)
+        run: python tools/fault_injection.py
+      - name: FI sabotage must exit 1
+        run: |
+          if python tools/fault_injection.py --sabotage > /dev/null; then echo "sabotage passed: instrument is vacuous"; exit 1; fi
