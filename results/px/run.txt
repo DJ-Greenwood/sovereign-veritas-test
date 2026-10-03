@@ -1,0 +1,16 @@
+PX4/PX2 | Perplexity attacks 4 and 2 | registered in docs/PX_PREREG.md
+PX4 {"allow_silent": 15, "defer_complete": 59, "first_decisions": {"ALLOW": 15, "DEFER": 59, "REFUSE": 4616}, "kernel_verifier_disagree": 0, "max_rounds": 9, "reach_allow": 4690, "refuse_masked": 4567, "refuse_masked_pct": 98.94, "vectors": 4690}
+PX2 tight {"alt": 3.0, "cochanged_verifier_on_variant": ["CONSISTENT", []], "same_verifier_id": true, "stock_decision": "ALLOW", "stock_verifier_on_stock": "CONSISTENT", "stock_verifier_on_variant": ["1", ["measurement_recomputed"]], "variant_decision": "REFUSE", "variant_why": "altitude 3.0 not within 5..120.0 m", "version_fields": 0}
+PX2 loose {"alt": 1.5, "cochanged_verifier_on_variant": ["CONSISTENT", []], "same_verifier_id": true, "stock_decision": "REFUSE", "stock_verifier_on_stock": "CONSISTENT", "stock_verifier_on_variant": ["1", ["measurement_recomputed"]], "variant_decision": "ALLOW", "variant_why": "all goto rules hold", "version_fields": 0}
+HELD     PX4a repair loop reaches ALLOW for all 4,690 within 13 rounds                          4690/4690, max rounds 9
+HELD     PX4b repairing a REFUSE's listed reason misses ALLOW in >= 10% of REFUSE vectors       4567 of 4616 (98.94%)
+HELD     PX4c repairing a DEFER's listed reasons gives ALLOW in 59/59                           59 of 59
+HELD     PX4d kernel and verifier trajectories identical on every vector                        disagree 0
+HELD     PX4e ALLOW vectors record no reasons (15/15)                                           15 of 15
+HELD     PX2a same verifier_id, 0 fields naming the check's code version                        version fields tight 0 loose 0
+HELD     PX2b tight 'why' names the new floor; loose 'why' says all rules hold                  tight: 'altitude 3.0 not within 5..120.0 m'; loose: 'all goto rules hold'
+HELD     PX2c stock verifier fails both variant packages                                        tight ('1', ['measurement_recomputed']), loose ('1', ['measurement_recomputed'])
+HELD     PX2d co-changed verifier: both variants CONSISTENT, change undetectable from the packages tight CONSISTENT, loose CONSISTENT
+VERDICT  9 of 9 as registered
+DIGEST   dad7aee8ffe1224273d87b9b03ad12ea3f57adc937ea7d14d02fc922b831819c
+RECORDED none yet: first run

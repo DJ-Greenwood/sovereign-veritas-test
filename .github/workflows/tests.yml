@@ -97,6 +97,12 @@ jobs:
         run: |
           set +e; python tools/recovery_admissibility.py --sabotage > v15_sab.txt; rc=$?; set -e
           tail -3 v15_sab.txt
+      - name: PX4/PX2 (Perplexity attacks 4, 2) - registered outcome reproduced (docs/PX_RESULTS.md)
+        run: python tools/px_probe.py | tail -3
+      - name: PX probe can fail (--sabotage -> exit 1)
+        run: |
+          set +e; python tools/px_probe.py --sabotage > px_sab.txt; rc=$?; set -e
+          tail -3 px_sab.txt
           test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
       - name: Fetch vacuity_lint, pinned
         run: |

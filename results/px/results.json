@@ -1,0 +1,69 @@
+{
+ "digest": "dad7aee8ffe1224273d87b9b03ad12ea3f57adc937ea7d14d02fc922b831819c",
+ "held": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "px2": {
+  "loose": {
+   "alt": 1.5,
+   "cochanged_verifier_on_variant": [
+    "CONSISTENT",
+    []
+   ],
+   "same_verifier_id": true,
+   "stock_decision": "REFUSE",
+   "stock_verifier_on_stock": "CONSISTENT",
+   "stock_verifier_on_variant": [
+    "1",
+    [
+     "measurement_recomputed"
+    ]
+   ],
+   "variant_decision": "ALLOW",
+   "variant_why": "all goto rules hold",
+   "version_fields": 0
+  },
+  "tight": {
+   "alt": 3.0,
+   "cochanged_verifier_on_variant": [
+    "CONSISTENT",
+    []
+   ],
+   "same_verifier_id": true,
+   "stock_decision": "ALLOW",
+   "stock_verifier_on_stock": "CONSISTENT",
+   "stock_verifier_on_variant": [
+    "1",
+    [
+     "measurement_recomputed"
+    ]
+   ],
+   "variant_decision": "REFUSE",
+   "variant_why": "altitude 3.0 not within 5..120.0 m",
+   "version_fields": 0
+  }
+ },
+ "px4": {
+  "allow_silent": 15,
+  "defer_complete": 59,
+  "first_decisions": {
+   "ALLOW": 15,
+   "DEFER": 59,
+   "REFUSE": 4616
+  },
+  "kernel_verifier_disagree": 0,
+  "max_rounds": 9,
+  "reach_allow": 4690,
+  "refuse_masked": 4567,
+  "refuse_masked_pct": 98.94,
+  "vectors": 4690
+ }
+}
