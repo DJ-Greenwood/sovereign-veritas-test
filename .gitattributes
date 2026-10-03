@@ -7,3 +7,5 @@ evidence/*.sig -text
 witness/packages.log -text
 keys/allowed_signers -text
 runs/**/*.json -text
+# Verbatim external texts whose sha256 is recorded in their header: keep their exact bytes (JG-2, F1).
+docs/external/*.md -text

@@ -1,0 +1,24 @@
+$ python tools/jg2_probe.py
+HELD    P1  {"differs_from_ascii_json": true, "digest_is_canonical": true, "sha256_sites": ["sovereign_veritas/evidence.py:48", "sovereign_veritas/package.py:44", "sovereign_veritas/package.py:49", "sovereign_veritas/package.py:92"], "sites_not_canonical_or_artifact": []}
+HELD    P3  {"of": 19, "unset": 19}
+HELD    P4  {"attrs": {"docs/external/perplexity_2026-10-02_gsn_prov_formal_mapping.md": "unset", "docs/external/perplexity_2026-10-02_repository_analysis.md": "unset", "docs/external/perplexity_2026-10-02_strongest_opposite.md": "unset"}, "expect": "unset"}
+HELD    P5  {"key_type": "ssh-ed25519", "of": 8, "verified": 8}
+HELD    P6  {"tampered_copy_verifies": false}
+HELD    P7  {"consumer_accepts_without_signature": "sv_package_7548237bceca.json", "verify_authenticity": "NOT_PROVEN", "verify_without_signature_exit": 0}
+NOT RUN P2  (Android / Termux: not run here)
+VERDICT 6 of 6 as registered (P2 not run)
+DIGEST 8616b4d867f0262542953dd947509c3fe798b3aecf0a0362a30bd7bd89ece213
+RECORDED not pinned yet
+exit 0
+$ python tools/jg2_probe.py --sabotage
+SABOTAGE: P6 checks an untampered copy
+HELD    P1  {"differs_from_ascii_json": true, "digest_is_canonical": true, "sha256_sites": ["sovereign_veritas/evidence.py:48", "sovereign_veritas/package.py:44", "sovereign_veritas/package.py:49", "sovereign_veritas/package.py:92"], "sites_not_canonical_or_artifact": []}
+HELD    P3  {"of": 19, "unset": 19}
+HELD    P4  {"attrs": {"docs/external/perplexity_2026-10-02_gsn_prov_formal_mapping.md": "unset", "docs/external/perplexity_2026-10-02_repository_analysis.md": "unset", "docs/external/perplexity_2026-10-02_strongest_opposite.md": "unset"}, "expect": "unset"}
+HELD    P5  {"key_type": "ssh-ed25519", "of": 8, "verified": 8}
+REFUTED P6  {"tampered_copy_verifies": true}
+HELD    P7  {"consumer_accepts_without_signature": "sv_package_7548237bceca.json", "verify_authenticity": "NOT_PROVEN", "verify_without_signature_exit": 0}
+NOT RUN P2  (Android / Termux: not run here)
+VERDICT 5 of 6 as registered (P2 not run)
+DIGEST f2a3d291f3f5925a49e843913a4af7fdcbaeee6126ebe8658f876449c56c80a8
+exit 1

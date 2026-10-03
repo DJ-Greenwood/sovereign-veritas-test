@@ -104,6 +104,13 @@ jobs:
           set +e; python tools/px_probe.py --sabotage > px_sab.txt; rc=$?; set -e
           tail -3 px_sab.txt
           test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
+      - name: JG-2 (report section 6 checked against the code) - registered outcome reproduced (docs/JG2_PREREG.md)
+        run: python tools/jg2_probe.py | tail -4
+      - name: JG-2 probe can fail (--sabotage skips the byte change -> exit 1)
+        run: |
+          set +e; python tools/jg2_probe.py --sabotage > jg2_sab.txt; rc=$?; set -e
+          tail -3 jg2_sab.txt
+          test "$rc" -eq 1 || { echo "expected exit 1 from --sabotage, got $rc"; exit 1; }
       - name: Fetch vacuity_lint, pinned
         run: |
           git clone -q https://github.com/holland202/vacuity_lint.py "$RUNNER_TEMP/vl"
