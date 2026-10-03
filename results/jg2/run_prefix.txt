@@ -1,0 +1,12 @@
+$ python tools/jg2_probe.py --pre-fix
+HELD    P1  {"differs_from_ascii_json": true, "digest_is_canonical": true, "sha256_sites": ["sovereign_veritas/evidence.py:48", "sovereign_veritas/package.py:44", "sovereign_veritas/package.py:49", "sovereign_veritas/package.py:92"], "sites_not_canonical_or_artifact": []}
+HELD    P3  {"of": 19, "unset": 19}
+HELD    P4  {"attrs": {"docs/external/perplexity_2026-10-02_gsn_prov_formal_mapping.md": "unspecified", "docs/external/perplexity_2026-10-02_repository_analysis.md": "unspecified", "docs/external/perplexity_2026-10-02_strongest_opposite.md": "unspecified"}, "expect": "unspecified"}
+HELD    P5  {"key_type": "ssh-ed25519", "of": 8, "verified": 8}
+HELD    P6  {"tampered_copy_verifies": false}
+HELD    P7  {"consumer_accepts_without_signature": "sv_package_7548237bceca.json", "verify_authenticity": "NOT_PROVEN", "verify_without_signature_exit": 0}
+NOT RUN P2  (Android / Termux: not run here)
+VERDICT 6 of 6 as registered (P2 not run)
+DIGEST 37b7a4d53a0b20fc08acfce4e86315d2f1ab6786cfd14339b756e2f653734f59
+RECORDED not pinned yet
+exit 0
