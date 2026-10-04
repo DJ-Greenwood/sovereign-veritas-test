@@ -68,7 +68,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: python -m pip install -e ".[test]"
+      - run: python -m pip install -e ".[test]" pymavlink
+      # pymavlink so test_vehicle_action runs in full: a mutant that passes while tests are
+      # skipped is UNDECIDED, so SURVIVED is only reachable when nothing is skipped here.
       - name: Every verifier guard, switched off in turn, must fail a test (method from EACE)
         run: python tools/verifier_mutants.py
       - name: Every planted Gate bug must be caught
