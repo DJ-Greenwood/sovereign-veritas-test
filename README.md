@@ -200,7 +200,7 @@ Every package states these, and the verifier fails a package that drops one:
 | The two measured packages, signed and published, checked from a fresh clone | 20 of 20 each, `SIGNED:holland202` | container |
 | Single-field rewrites of the published DEFER package | 0 of 807 verify signed (408 unsigned) | container |
 | Published evidence re-checked on every push | every package signed and consistent; every witness entry published | CI, 9 jobs |
-| Verifier guards switched off one at a time | 22 of 22 make a test fail (2 needed new tests) | container, CI |
+| Verifier guards switched off one at a time | 27 of 27 make a test fail (2 needed new tests; full run 2026-10-03, ssh-keygen and pymavlink installed so no test skipped) | container, CI |
 | Static scan for verification code with no fail path (vacuity_lint) | 0 findings in 66 files | container, CI |
 | Gate contract: kernel and verifier against 4690 vectors | both conform, one digest | container, CI, S25 |
 | Contract rules switched off one at a time | 22 of 23 fail a vector; the 23rd cannot be reached | container, CI |
