@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """run_all_challenges_and_report.py
-
+From James Greenwood
 Defensive Master Test Runner & Comprehensive Report Generator for Sovereign Veritas.
 Executes available tools and gracefully skips any missing scripts or packages.
 """
