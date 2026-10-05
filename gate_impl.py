@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""gate_impl.py - Standalone implementation of sv.gate/0 contract."""
+"""gate_impl.py - Standalone implementation of sv.gate/0 contract.
+From James Greenwood"""
 
 import json
 import math
