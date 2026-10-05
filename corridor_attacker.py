@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""corridor_attacker.py - Optimized Track 3 corridor attacker reaching 31.00m."""
+"""corridor_attacker.py - Optimized Track 3 corridor attacker reaching 31.00m.
+added by James Greenwood"""
 
 import json
 import sys
